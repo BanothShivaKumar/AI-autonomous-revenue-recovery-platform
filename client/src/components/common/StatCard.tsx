@@ -1,5 +1,5 @@
 import React from 'react';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, TrendingUp, TrendingDown } from 'lucide-react';
 
 interface StatCardProps {
   title: string;
@@ -9,7 +9,7 @@ interface StatCardProps {
   change?: string;
   isPositive?: boolean;
   trend?: string;
-  colorVariant?: 'blue' | 'emerald' | 'amber' | 'rose' | 'purple';
+  colorVariant?: 'blue' | 'emerald' | 'amber' | 'rose' | 'purple' | 'cyan';
   onClick?: () => void;
 }
 
@@ -24,51 +24,59 @@ export const StatCard: React.FC<StatCardProps> = ({
   colorVariant = 'blue',
   onClick,
 }) => {
-  const colorMap = {
-    blue: 'from-blue-600/20 to-indigo-600/5 text-blue-400 border-blue-500/20 group-hover:border-blue-500/40',
-    emerald: 'from-emerald-600/20 to-teal-600/5 text-emerald-400 border-emerald-500/20 group-hover:border-emerald-500/40',
-    amber: 'from-amber-600/20 to-orange-600/5 text-amber-400 border-amber-500/20 group-hover:border-amber-500/40',
-    rose: 'from-rose-600/20 to-pink-600/5 text-rose-400 border-rose-500/20 group-hover:border-rose-500/40',
-    purple: 'from-purple-600/20 to-violet-600/5 text-purple-400 border-purple-500/20 group-hover:border-purple-500/40',
+  const iconThemeMap = {
+    blue: 'text-brand-500 bg-brand-500/10 border-brand-500/20',
+    cyan: 'text-brand-400 bg-brand-500/10 border-brand-500/20',
+    emerald: 'text-success-500 bg-success-500/10 border-success-500/20',
+    amber: 'text-warning-500 bg-warning-500/10 border-warning-500/20',
+    rose: 'text-risk-500 bg-risk-500/10 border-risk-500/20',
+    purple: 'text-ai-500 bg-ai-500/10 border-ai-500/20',
   };
+
+  const iconStyle = iconThemeMap[colorVariant] || iconThemeMap.blue;
 
   return (
     <div
       onClick={onClick}
-      className={`relative overflow-hidden rounded-xl border border-slate-800 bg-slate-900/90 p-5 shadow-lg backdrop-blur transition-all duration-200 hover:shadow-xl ${
-        onClick ? 'cursor-pointer hover:border-slate-700' : ''
+      className={`rounded-xl border border-[#273449] bg-[#111827] p-5 shadow-card-subtle transition-all duration-200 ${
+        onClick ? 'cursor-pointer hover:border-slate-600 hover:bg-[#151e30]' : ''
       }`}
     >
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{title}</p>
-        <div className={`rounded-lg bg-gradient-to-br p-2.5 border ${colorMap[colorVariant]}`}>
-          <Icon className="h-5 w-5" />
+        <span className="text-xs font-medium text-slate-400">{title}</span>
+        <div className={`rounded-lg p-2 border ${iconStyle}`}>
+          <Icon className="h-4 w-4" />
         </div>
       </div>
 
       <div className="mt-3">
-        <p className="text-2xl font-bold tracking-tight text-white">{value}</p>
+        <p className="text-2xl font-bold tracking-tight text-white font-mono">{value}</p>
         {subtitle && <p className="mt-1 text-xs text-slate-400">{subtitle}</p>}
       </div>
 
       {(change || trend) && (
-        <div className="mt-3 flex items-center gap-1.5 text-xs">
+        <div className="mt-3 pt-3 border-t border-[#273449]/80 flex items-center gap-1.5 text-xs">
           {change && (
             <span
-              className={`font-semibold ${
+              className={`inline-flex items-center gap-1 font-semibold ${
                 isPositive !== undefined
                   ? isPositive
-                    ? 'text-emerald-400'
-                    : 'text-rose-400'
+                    ? 'text-success-500'
+                    : 'text-risk-500'
                   : 'text-slate-300'
               }`}
             >
+              {isPositive !== undefined && (
+                isPositive ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />
+              )}
               {change}
             </span>
           )}
-          {trend && <span className="text-slate-400">{trend}</span>}
+          {trend && <span className="text-slate-500 text-xs">{trend}</span>}
         </div>
       )}
     </div>
   );
 };
+
+

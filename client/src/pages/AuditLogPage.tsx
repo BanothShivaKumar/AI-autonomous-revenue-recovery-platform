@@ -29,7 +29,7 @@ export const AuditLogPage: React.FC = () => {
     return (
       <div className="flex h-96 items-center justify-center">
         <div className="flex items-center gap-3 text-slate-400 text-sm">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
           <span>Verifying Immutable Compliance Audit Trail...</span>
         </div>
       </div>
@@ -38,9 +38,9 @@ export const AuditLogPage: React.FC = () => {
 
   const filtered = logs.filter((l) => {
     const matchesSearch =
-      l.action.toLowerCase().includes(search.toLowerCase()) ||
-      l.entityType.toLowerCase().includes(search.toLowerCase()) ||
-      l.performedBy.toLowerCase().includes(search.toLowerCase());
+      l.action?.toLowerCase().includes(search.toLowerCase()) ||
+      l.entityType?.toLowerCase().includes(search.toLowerCase()) ||
+      l.performedBy?.toLowerCase().includes(search.toLowerCase());
     const matchesType = filterType === 'ALL' || l.entityType === filterType;
     return matchesSearch && matchesType;
   });
@@ -50,115 +50,130 @@ export const AuditLogPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
+          <h1 className="text-2xl font-bold text-slate-100 tracking-tight flex items-center gap-2.5">
             Audit Log & Compliance Governance
-            <span className="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-semibold text-blue-400 border border-blue-500/20">
+            <span className="rounded-full bg-brand-500/10 px-2.5 py-0.5 text-xs font-bold text-brand-400 border border-brand-500/30">
               {logs.length} Records
             </span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Immutable regulatory audit trail recording all AI reasoning, human approvals, PayPal webhook dispatches, and permission blocks.
+            Immutable regulatory audit trail recording all AI reasoning, human approvals, PayPal webhook dispatches, and permission evaluations.
           </p>
         </div>
 
         {/* Filters */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <div className="relative w-64">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
+            <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search audit actions..."
-              className="w-full rounded-xl border border-slate-800 bg-slate-900 pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+              placeholder="Search audit trail..."
+              className="fintech-input pl-10 pr-4 py-2 text-xs"
             />
           </div>
 
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-xs text-white focus:border-blue-500 focus:outline-none"
+            className="fintech-input px-3 py-2 text-xs"
           >
             <option value="ALL">All Entity Types</option>
-            <option value="ACTION_REQUEST">Action Requests</option>
-            <option value="PAYMENT">Payments</option>
+            <option value="ACTION">Action Center</option>
+            <option value="INVOICE">Invoices</option>
             <option value="REMINDER">Reminders</option>
-            <option value="PERMISSION">Permission Checks</option>
             <option value="WEBHOOK">Webhooks</option>
+            <option value="AGENT">AI Agent</option>
           </select>
         </div>
       </div>
 
-      {/* Audit Logs Table */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/90 overflow-hidden shadow-xl">
+      {/* Logs Table */}
+      <div className="fintech-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950/80 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <thead className="bg-fintech-bg/70 border-b border-fintech-border text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               <tr>
-                <th className="px-6 py-3.5">Timestamp</th>
-                <th className="px-6 py-3.5">Entity Type</th>
-                <th className="px-6 py-3.5">Action</th>
-                <th className="px-6 py-3.5">Performed By</th>
-                <th className="px-6 py-3.5">Entity ID</th>
-                <th className="px-6 py-3.5 text-right">Details</th>
+                <th className="p-4">Timestamp</th>
+                <th className="p-4">Entity</th>
+                <th className="p-4">Action</th>
+                <th className="p-4">Actor</th>
+                <th className="p-4">Payload / Metadata</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80 text-slate-200 font-mono">
-              {filtered.map((log) => (
-                <tr key={log.id} className="hover:bg-slate-800/40 transition-colors">
-                  <td className="px-6 py-4 text-slate-400">
-                    {new Date(log.timestamp).toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 font-bold text-blue-400">
-                    {log.entityType}
-                  </td>
-                  <td className="px-6 py-4 font-bold text-white">
-                    {log.action}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                        log.performedBy === 'PAYPAL_WEBHOOK'
-                          ? 'bg-purple-500/10 text-purple-300 border-purple-500/30'
-                          : log.performedBy === 'USER'
-                          ? 'bg-blue-500/10 text-blue-300 border-blue-500/30'
-                          : log.performedBy === 'PERMISSION_ENGINE'
-                          ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
-                          : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
-                      }`}
-                    >
-                      {log.performedBy}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-slate-400 truncate max-w-xs">
-                    {log.entityId}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    {log.detailsJson && (
-                      <button
-                        onClick={() => setSelectedLog(log)}
-                        className="rounded bg-slate-800 hover:bg-slate-700 px-2.5 py-1 text-[11px] text-slate-300 transition-colors"
+            <tbody className="divide-y divide-fintech-border/80">
+              {filtered.map((log) => {
+                const isAI = log.performedBy?.includes('AI') || log.performedBy?.includes('agent');
+                const isWebhook = log.performedBy?.includes('webhook') || log.entityType === 'WEBHOOK';
+
+                return (
+                  <tr
+                    key={log.id}
+                    onClick={() => setSelectedLog(log)}
+                    className="hover:bg-fintech-secondary/40 transition-colors cursor-pointer"
+                  >
+                    <td className="p-4 font-mono text-slate-400 text-[11px] whitespace-nowrap">
+                      {new Date(log.createdAt).toLocaleString()}
+                    </td>
+                    <td className="p-4">
+                      <span className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-fintech-bg border border-fintech-border text-slate-300">
+                        {log.entityType}
+                      </span>
+                    </td>
+                    <td className="p-4 font-bold text-slate-100">
+                      {log.action}
+                    </td>
+                    <td className="p-4">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium ${
+                          isAI
+                            ? 'text-ai-400 bg-ai-500/10 border border-ai-500/20'
+                            : isWebhook
+                            ? 'text-brand-400 bg-brand-500/10 border border-brand-500/20'
+                            : 'text-success-400 bg-success-500/10 border border-success-500/20'
+                        }`}
                       >
-                        View JSON
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                        {isAI ? <Bot className="h-3 w-3" /> : <User className="h-3 w-3" />}
+                        <span>{log.performedBy}</span>
+                      </span>
+                    </td>
+                    <td className="p-4 font-mono text-[11px] text-slate-400 max-w-xs truncate">
+                      {log.metadataJson ? log.metadataJson : '—'}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* JSON Viewer Modal */}
+      {/* Log Detail Modal */}
       <Modal
         isOpen={!!selectedLog}
         onClose={() => setSelectedLog(null)}
-        title={`Audit Payload: ${selectedLog?.action}`}
-        subtitle={`Recorded at ${selectedLog ? new Date(selectedLog.timestamp).toISOString() : ''}`}
+        title={`Audit Event: ${selectedLog?.action || ''}`}
+        subtitle={`Recorded at ${selectedLog ? new Date(selectedLog.createdAt).toLocaleString() : ''}`}
       >
-        <div className="rounded-xl bg-slate-950 p-4 border border-slate-800 text-xs font-mono text-slate-200 overflow-x-auto max-h-96">
-          <pre>{selectedLog?.detailsJson ? JSON.stringify(JSON.parse(selectedLog.detailsJson), null, 2) : 'No details'}</pre>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4 text-xs">
+            <div className="p-3 rounded-lg bg-fintech-bg border border-fintech-border">
+              <span className="text-slate-400 uppercase text-[10px] font-bold">Actor:</span>
+              <p className="font-semibold text-slate-100 mt-0.5">{selectedLog?.performedBy}</p>
+            </div>
+            <div className="p-3 rounded-lg bg-fintech-bg border border-fintech-border">
+              <span className="text-slate-400 uppercase text-[10px] font-bold">Entity Type:</span>
+              <p className="font-mono text-brand-400 mt-0.5">{selectedLog?.entityType} ({selectedLog?.entityId})</p>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-lg bg-fintech-bg border border-fintech-border space-y-1">
+            <span className="text-slate-400 uppercase text-[10px] font-bold">Full Metadata JSON</span>
+            <pre className="text-[11px] font-mono text-slate-300 overflow-x-auto max-h-60 whitespace-pre-wrap">
+              {selectedLog?.metadataJson ? JSON.stringify(JSON.parse(selectedLog.metadataJson), null, 2) : 'No metadata recorded'}
+            </pre>
+          </div>
         </div>
       </Modal>
     </div>

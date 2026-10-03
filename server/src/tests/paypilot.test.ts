@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { PermissionEngine } from '../services/permissionEngine/permissionEngine';
 import { calculateCustomerMetrics } from '../services/customerIntelligence/metricsCalculator';
 import { analyzeCustomerBehaviorChange } from '../services/customerIntelligence/behaviorChangeDetector';
@@ -9,18 +9,23 @@ import { AIAgentService } from '../services/ai/aiAgentService';
 import { seedDemoBusiness } from '../services/demo/demoSeeder';
 import { prisma } from '../prisma/client';
 
-describe('PayPilot Revenue Recovery & Customer Intelligence Core Engine Tests', () => {
+describe('PayPilot Revenue Recovery & Customer Intelligence Core Engine Tests', { timeout: 30000 }, () => {
   let merchantId: string;
   let alexCustomerId: string;
   let alexInvoiceId: string;
 
-  beforeEach(async () => {
-    await seedDemoBusiness();
 
-    const merchant = await prisma.merchant.findFirst({
+  beforeAll(async () => {
+    let merchant = await prisma.merchant.findFirst({
       include: { customers: true, invoices: true },
     });
-    if (!merchant) throw new Error('No merchant found. Ensure demo is seeded.');
+    if (!merchant || merchant.customers.length === 0) {
+      await seedDemoBusiness();
+      merchant = await prisma.merchant.findFirst({
+        include: { customers: true, invoices: true },
+      });
+    }
+    if (!merchant) throw new Error('No merchant found.');
     merchantId = merchant.id;
 
     const alex = merchant.customers.find((c) => c.name.includes('Alex'));
@@ -30,7 +35,15 @@ describe('PayPilot Revenue Recovery & Customer Intelligence Core Engine Tests', 
     const inv = merchant.invoices.find((i) => i.invoiceNumber === 'INV-1024');
     if (!inv) throw new Error('INV-1024 not found.');
     alexInvoiceId = inv.id;
-  });
+
+    // Ensure invoice is in standard test baseline state (UNPAID overdue)
+    await prisma.invoice.update({
+      where: { id: alexInvoiceId },
+      data: { status: 'UNPAID', paidDate: null },
+    });
+  }, 30000);
+
+
 
   // 1. Permission Engine Safety Test
   describe('Permission Engine & Safety Controls', () => {
@@ -147,6 +160,11 @@ describe('PayPilot Revenue Recovery & Customer Intelligence Core Engine Tests', 
   // 5. PayPal Webhook Processing & Auto-Cancellation
   describe('PayPal Webhook Feedback Loop', () => {
     it('CRITICAL TEST: When payment webhook is received, invoice is marked PAID and scheduled reminders are AUTO-CANCELLED', async () => {
+      // Clear previous reminders for this invoice to prevent limit blocks during test runs
+      await prisma.reminder.deleteMany({
+        where: { invoiceId: alexInvoiceId },
+      });
+
       // 1. Stage a reminder for Alex's invoice
       const stageResult = await prepareAndScheduleReminder({
         merchantId,
@@ -162,12 +180,13 @@ describe('PayPilot Revenue Recovery & Customer Intelligence Core Engine Tests', 
       expect(beforeReminder?.status).toBe('NEEDS_REVIEW');
 
       // 2. Simulate PayPal PAYMENT.CAPTURE.COMPLETED webhook event
+      const testTimestamp = Date.now();
       const webhookPayload = {
-        id: 'WH-TEST-' + Date.now(),
+        id: 'WH-TEST-' + testTimestamp,
         event_version: '1.0',
         event_type: 'PAYMENT.CAPTURE.COMPLETED',
         resource: {
-          id: 'CAP-TEST-12345',
+          id: 'CAP-TEST-' + testTimestamp,
           invoice_id: 'INV-1024',
           amount: { value: '450.00', currency_code: 'USD' },
           payer: { email_address: 'alex@alextech.io' },

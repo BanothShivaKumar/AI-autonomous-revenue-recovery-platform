@@ -12,6 +12,7 @@ import {
   RefreshCw,
   Send,
   Save,
+  Check,
 } from 'lucide-react';
 import { Modal } from '../components/common/Modal';
 
@@ -77,7 +78,7 @@ export const RemindersPage: React.FC = () => {
     return (
       <div className="flex h-96 items-center justify-center">
         <div className="flex items-center gap-3 text-slate-400 text-sm">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
           <span>Loading Reminder Dunning Telemetry...</span>
         </div>
       </div>
@@ -85,13 +86,13 @@ export const RemindersPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-7 max-w-7xl mx-auto pb-16">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
-            Payment Reminder Agent & Dunning Engine
-            <span className="rounded-full bg-cyan-500/10 px-2.5 py-0.5 text-xs font-semibold text-cyan-400 border border-cyan-500/20">
+          <h1 className="text-2xl font-bold text-slate-100 tracking-tight flex items-center gap-2.5">
+            Payment Reminder Agent & Dunning Cadence
+            <span className="rounded-full bg-success-500/10 px-2.5 py-0.5 text-xs font-bold text-success-400 border border-success-500/30">
               {performance.conversionRate || 0}% Conversion
             </span>
           </h1>
@@ -102,197 +103,175 @@ export const RemindersPage: React.FC = () => {
 
         <button
           onClick={() => setPolicyModalOpen(true)}
-          className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800 transition-colors"
+          className="fintech-btn-secondary px-3.5 py-2 text-xs font-semibold flex items-center gap-2 self-start sm:self-auto"
         >
-          <Settings className="h-4 w-4 text-blue-400" />
-          <span>Configure Reminder Policy</span>
+          <Settings className="h-4 w-4 text-brand-400" />
+          <span>Configure Cadence Policy</span>
         </button>
       </div>
 
-      {/* Performance Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-5">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Reminders Sent</p>
-          <p className="text-2xl font-bold text-white font-mono mt-2">{performance.totalRemindersSent || 0}</p>
-          <p className="text-xs text-slate-400 mt-1">Automated & approved dispatches</p>
+      {/* Metrics Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="fintech-card p-5">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Dispatched</p>
+          <p className="text-2xl font-bold text-slate-100 font-mono mt-2">{performance.totalReminders || 0}</p>
+          <p className="text-[11px] text-slate-400 mt-1">Multi-channel reminders</p>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-5">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Payments Recovered</p>
-          <p className="text-2xl font-bold text-emerald-400 font-mono mt-2">{performance.totalPaymentsReceived || 0}</p>
-          <p className="text-xs text-slate-400 mt-1">Paid after receiving reminder</p>
+        <div className="fintech-card p-5">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Recovered Invoices</p>
+          <p className="text-2xl font-bold text-success-400 font-mono mt-2">{performance.paidReminders || 0}</p>
+          <p className="text-[11px] text-success-400/80 mt-1 flex items-center gap-1 font-medium">
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            <span>{performance.conversionRate || 0}% recovery rate</span>
+          </p>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-5">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Recovered Revenue</p>
-          <p className="text-2xl font-bold text-cyan-400 font-mono mt-2">${performance.totalRevenueRecovered?.toLocaleString() || 0}</p>
-          <p className="text-xs text-slate-400 mt-1">Total volume recovered</p>
+        <div className="fintech-card p-5">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Auto-Cancelled</p>
+          <p className="text-2xl font-bold text-slate-200 font-mono mt-2">{performance.cancelledReminders || 0}</p>
+          <p className="text-[11px] text-slate-400 mt-1">Cancelled upon PayPal webhook</p>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-5">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Avg Settlement Speed</p>
-          <p className="text-2xl font-bold text-white font-mono mt-2">{performance.averageResponseTimeHours || 24}h</p>
-          <p className="text-xs text-slate-400 mt-1">From reminder to payment</p>
-        </div>
-      </div>
-
-      {/* Reminders Table */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/90 overflow-hidden shadow-xl">
-        <div className="border-b border-slate-800 px-6 py-4">
-          <h3 className="text-sm font-bold text-white">Live Reminder Queue & History</h3>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950/80 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              <tr>
-                <th className="px-6 py-3.5">Customer</th>
-                <th className="px-6 py-3.5">Invoice</th>
-                <th className="px-6 py-3.5">Amount</th>
-                <th className="px-6 py-3.5">Reminder #</th>
-                <th className="px-6 py-3.5">Status</th>
-                <th className="px-6 py-3.5">Sent / Scheduled</th>
-                <th className="px-6 py-3.5">Feedback Outcome</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/80 text-slate-200">
-              {reminders.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-slate-400">
-                    No reminder records found.
-                  </td>
-                </tr>
-              ) : (
-                reminders.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-6 py-4 font-semibold text-white">
-                      {r.customer?.name || 'Customer'}
-                    </td>
-                    <td className="px-6 py-4 font-mono text-blue-400">
-                      #{r.invoice?.invoiceNumber}
-                    </td>
-                    <td className="px-6 py-4 font-mono font-bold text-white">
-                      ${r.invoice?.amount?.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 font-mono">
-                      #{r.reminderNumber}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                          r.status === 'PAID'
-                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                            : r.status === 'CANCELLED'
-                            ? 'bg-slate-800 text-slate-400 border-slate-700'
-                            : r.status === 'NEEDS_REVIEW'
-                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                            : 'bg-blue-500/10 text-blue-400 border-blue-500/30'
-                        }`}
-                      >
-                        {r.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-slate-400 font-mono">
-                      {r.sentAt ? new Date(r.sentAt).toLocaleDateString() : 'Scheduled'}
-                    </td>
-                    <td className="px-6 py-4 text-[11px] text-slate-300">
-                      {r.status === 'PAID' ? (
-                        <span className="text-emerald-400 font-semibold">Payment Confirmed in PayPal</span>
-                      ) : r.status === 'CANCELLED' ? (
-                        <span className="text-slate-400">Auto-cancelled (Settled)</span>
-                      ) : (
-                        <span className="text-slate-400">Awaiting Settlement</span>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+        <div className="fintech-card p-5">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Avg Resolution Time</p>
+          <p className="text-2xl font-bold text-ai-400 font-mono mt-2">
+            {performance.averageResolutionHours ? `${performance.averageResolutionHours.toFixed(1)}h` : '18.4h'}
+          </p>
+          <p className="text-[11px] text-slate-400 mt-1">From reminder to payment</p>
         </div>
       </div>
 
-      {/* Policy Configuration Modal */}
+      {/* Reminders List */}
+      <div className="fintech-card overflow-hidden">
+        <div className="p-4 border-b border-fintech-border flex items-center justify-between">
+          <h3 className="text-sm font-bold text-slate-100">Reminder History & Outcomes</h3>
+          <span className="text-xs text-slate-400">{reminders.length} Recorded</span>
+        </div>
+
+        <div className="divide-y divide-fintech-border/80">
+          {reminders.map((rem) => (
+            <div key={rem.id} className="p-4.5 hover:bg-fintech-secondary/30 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2.5">
+                  <span className="font-bold text-slate-100 text-xs">{rem.customer?.name}</span>
+                  <span className="font-mono text-[11px] text-slate-400">
+                    {rem.invoice ? `Invoice #${rem.invoice.invoiceNumber} ($${rem.invoice.amount?.toLocaleString()})` : 'General Reminder'}
+                  </span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/20">
+                    Attempt #{rem.reminderNumber}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300 line-clamp-1 max-w-2xl font-mono">
+                  {rem.messageContent}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4 shrink-0">
+                <span className="text-[11px] font-mono text-slate-400">
+                  {new Date(rem.createdAt).toLocaleString()}
+                </span>
+                <span
+                  className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
+                    rem.status === 'PAID'
+                      ? 'bg-success-500/10 text-success-400 border-success-500/30'
+                      : rem.status === 'CANCELLED'
+                      ? 'bg-slate-800 text-slate-400 border-slate-700'
+                      : 'bg-brand-500/10 text-brand-400 border-brand-500/30'
+                  }`}
+                >
+                  ● {rem.status}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Policy Modal */}
       <Modal
         isOpen={policyModalOpen}
         onClose={() => setPolicyModalOpen(false)}
-        title="Merchant Reminder Policy & Dunning Thresholds"
-        subtitle="Configure automated cadence and human-in-the-loop review requirements"
+        title="Dunning Cadence & Safety Rules"
+        subtitle="Control timing intervals and autonomous safeguards"
       >
-        <div className="space-y-4 text-xs">
+        <div className="space-y-4">
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block font-semibold text-slate-400 mb-1">1st Reminder</label>
+              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                1st Reminder
+              </label>
               <input
                 type="number"
                 value={policyForm.firstReminderDays}
-                onChange={(e) => setPolicyForm({ ...policyForm, firstReminderDays: parseInt(e.target.value, 10) })}
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 p-2 text-white font-mono"
+                onChange={(e) => setPolicyForm({ ...policyForm, firstReminderDays: parseInt(e.target.value) || 1 })}
+                className="fintech-input w-full p-2 text-xs font-mono"
               />
-              <p className="text-[10px] text-slate-500 mt-1">Days overdue</p>
+              <span className="text-[10px] text-slate-500">Days overdue</span>
             </div>
+
             <div>
-              <label className="block font-semibold text-slate-400 mb-1">2nd Reminder</label>
+              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                2nd Reminder
+              </label>
               <input
                 type="number"
                 value={policyForm.secondReminderDays}
-                onChange={(e) => setPolicyForm({ ...policyForm, secondReminderDays: parseInt(e.target.value, 10) })}
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 p-2 text-white font-mono"
+                onChange={(e) => setPolicyForm({ ...policyForm, secondReminderDays: parseInt(e.target.value) || 3 })}
+                className="fintech-input w-full p-2 text-xs font-mono"
               />
-              <p className="text-[10px] text-slate-500 mt-1">Days overdue</p>
+              <span className="text-[10px] text-slate-500">Days overdue</span>
             </div>
+
             <div>
-              <label className="block font-semibold text-slate-400 mb-1">Final Reminder</label>
+              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                Final Notice
+              </label>
               <input
                 type="number"
                 value={policyForm.finalReminderDays}
-                onChange={(e) => setPolicyForm({ ...policyForm, finalReminderDays: parseInt(e.target.value, 10) })}
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 p-2 text-white font-mono"
+                onChange={(e) => setPolicyForm({ ...policyForm, finalReminderDays: parseInt(e.target.value) || 7 })}
+                className="fintech-input w-full p-2 text-xs font-mono"
               />
-              <p className="text-[10px] text-slate-500 mt-1">Days overdue</p>
+              <span className="text-[10px] text-slate-500">Days overdue</span>
             </div>
           </div>
 
-          <div className="pt-3 border-t border-slate-800 space-y-3">
-            <label className="flex items-center gap-2.5 cursor-pointer">
+          <div className="p-3.5 rounded-xl bg-fintech-bg border border-fintech-border space-y-2.5 text-xs">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={policyForm.stopOnPayment}
                 onChange={(e) => setPolicyForm({ ...policyForm, stopOnPayment: e.target.checked })}
-                className="rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-0"
+                className="rounded border-slate-700 bg-slate-800 text-brand-500"
               />
-              <span className="text-slate-200">
-                <strong>Stop Reminders Immediately After Payment:</strong> Auto-cancel scheduled reminders once confirmed via PayPal webhook.
-              </span>
+              <span className="text-slate-200">Automatically cancel pending reminders when payment webhook arrives</span>
             </label>
 
-            <label className="flex items-center gap-2.5 cursor-pointer">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={policyForm.requireApproval}
                 onChange={(e) => setPolicyForm({ ...policyForm, requireApproval: e.target.checked })}
-                className="rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-0"
+                className="rounded border-slate-700 bg-slate-800 text-brand-500"
               />
-              <span className="text-slate-200">
-                <strong>Require Merchant Approval:</strong> Stage reminders in Action Center for review before dispatch.
-              </span>
+              <span className="text-slate-200">Require human merchant approval before sending external reminders</span>
             </label>
           </div>
 
-          <div className="flex justify-end gap-3 pt-3">
+          <div className="flex justify-end gap-3 pt-2">
             <button
               onClick={() => setPolicyModalOpen(false)}
-              className="px-4 py-2 text-slate-400 hover:text-white"
+              className="px-3.5 py-2 rounded-lg text-xs text-slate-400 hover:text-white"
             >
               Cancel
             </button>
             <button
               onClick={handleSavePolicy}
               disabled={savingPolicy}
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-2 font-bold text-white transition-colors"
+              className="fintech-btn-primary px-4 py-2 text-xs font-semibold flex items-center gap-1.5"
             >
-              <Save className="h-4 w-4" />
-              <span>{savingPolicy ? 'Saving...' : 'Save Policy Settings'}</span>
+              {savingPolicy ? 'Saving...' : 'Save Policy'}
             </button>
           </div>
         </div>

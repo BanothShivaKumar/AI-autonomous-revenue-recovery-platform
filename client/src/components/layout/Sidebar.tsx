@@ -13,7 +13,8 @@ import {
   ScrollText,
   Workflow,
   Sparkles,
-  Zap,
+  Shield,
+  Layers,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -23,17 +24,17 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ pendingActionsCount = 0 }) => {
   const navItems = [
     {
-      group: 'OVERVIEW & INTELLIGENCE',
+      group: 'INTELLIGENCE & OPERATIONS',
       items: [
         { name: 'Executive Dashboard', path: '/dashboard', icon: LayoutDashboard },
         { name: 'Customer Intelligence', path: '/customer-intelligence', icon: BrainCircuit },
-        { name: 'Customer Grid (AG Grid)', path: '/customers', icon: Users },
+        { name: 'Customer 360 Grid', path: '/customers', icon: Users },
       ],
     },
     {
-      group: 'AI REVENUE OPERATIONS',
+      group: 'AI REVENUE AGENT',
       items: [
-        { name: 'AI Command Center', path: '/ai-agent', icon: Bot, badge: 'Agent' },
+        { name: 'AI Command Center', path: '/ai-agent', icon: Bot, isAi: true },
         {
           name: 'Action Center',
           path: '/action-center',
@@ -44,46 +45,46 @@ export const Sidebar: React.FC<SidebarProps> = ({ pendingActionsCount = 0 }) => 
       ],
     },
     {
-      group: 'PAYPAL FINANCIAL INFRASTRUCTURE',
+      group: 'FINANCIAL INFRASTRUCTURE',
       items: [
         { name: 'Invoices & Recovery', path: '/invoices', icon: Receipt },
-        { name: 'Subscriptions & Dunning', path: '/subscriptions', icon: CreditCard },
+        { name: 'Subscriptions', path: '/subscriptions', icon: CreditCard },
         { name: 'Transactions', path: '/transactions', icon: History },
       ],
     },
     {
-      group: 'GOVERNANCE & EVALUATION',
+      group: 'GOVERNANCE & LAB',
       items: [
-        { name: 'Audit Log & Compliance', path: '/audit-log', icon: ScrollText },
-        { name: 'Demo & Webhook Lab', path: '/demo-simulator', icon: Workflow, badge: 'Live' },
+        { name: 'Audit Trail', path: '/audit-log', icon: ScrollText },
+        { name: 'Simulation & Webhooks', path: '/demo-simulator', icon: Workflow },
       ],
     },
   ];
 
   return (
-    <aside className="flex h-screen w-64 flex-col justify-between border-r border-slate-800 bg-slate-950 p-4 select-none shrink-0 overflow-y-auto">
+    <aside className="flex h-screen w-64 flex-col justify-between border-r border-[#273449] bg-[#0B1120] p-4 select-none shrink-0 overflow-y-auto z-20">
       <div className="space-y-6">
-        {/* Logo */}
-        <div className="flex items-center gap-3 px-2 py-1">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 shadow-lg shadow-blue-600/30 text-white font-black text-lg">
+        {/* Brand Header */}
+        <div className="flex items-center gap-3 px-2 py-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500 text-white font-bold text-base shadow-sm">
             P
           </div>
           <div>
-            <h1 className="text-base font-extrabold text-white tracking-tight flex items-center gap-1.5">
-              PayPilot
-              <span className="rounded bg-blue-500/20 px-1.5 py-0.2 text-[9px] font-bold text-blue-400 border border-blue-500/30">
-                AI 2026
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-sm font-bold text-white tracking-tight">PayPilot</h1>
+              <span className="rounded bg-brand-500/15 px-1.5 py-0.2 text-[10px] font-semibold text-brand-400 border border-brand-500/20">
+                AI Ops
               </span>
-            </h1>
-            <p className="text-[10px] text-slate-400 font-medium">Revenue Recovery Agent</p>
+            </div>
+            <p className="text-[11px] text-slate-400">Revenue Recovery Suite</p>
           </div>
         </div>
 
-        {/* Navigation Groups */}
-        <div className="space-y-6">
+        {/* Navigation */}
+        <div className="space-y-5">
           {navItems.map((group) => (
             <div key={group.group} className="space-y-1">
-              <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                 {group.group}
               </p>
               <div className="space-y-0.5">
@@ -94,27 +95,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ pendingActionsCount = 0 }) => 
                       key={item.path}
                       to={item.path}
                       className={({ isActive }) =>
-                        `flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all ${
+                        `flex items-center justify-between rounded-lg px-3 py-2 text-xs font-medium transition-all ${
                           isActive
-                            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20 font-bold'
-                            : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                            ? 'bg-brand-500/10 text-brand-400 font-semibold border-l-2 border-brand-500'
+                            : 'text-slate-300 hover:bg-[#111827] hover:text-white'
                         }`
                       }
                     >
                       <div className="flex items-center gap-2.5">
-                        <Icon className="h-4 w-4 shrink-0" />
+                        <Icon className={`h-4 w-4 shrink-0 ${item.isAi ? 'text-ai-500' : ''}`} />
                         <span>{item.name}</span>
                       </div>
 
                       {item.count !== undefined && item.count > 0 && (
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-extrabold text-white shadow-sm">
+                        <span className="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-warning-500 text-[10px] font-bold text-white">
                           {item.count}
                         </span>
                       )}
 
-                      {item.badge && !item.count && (
-                        <span className="rounded-full bg-blue-500/20 px-1.5 py-0.5 text-[9px] font-semibold text-blue-300 border border-blue-500/30">
-                          {item.badge}
+                      {item.isAi && (
+                        <span className="rounded bg-ai-500/10 px-1.5 py-0.2 text-[9px] font-semibold text-ai-500 border border-ai-500/20">
+                          AI
                         </span>
                       )}
                     </NavLink>
@@ -126,19 +127,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ pendingActionsCount = 0 }) => 
         </div>
       </div>
 
-      {/* Footer / System Status */}
-      <div className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-3 text-[11px] text-slate-400">
-        <div className="flex items-center justify-between font-semibold text-slate-300">
-          <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            Permission Engine
-          </span>
-          <span className="text-[10px] text-emerald-400 font-mono">STRICT_AUTH</span>
+      {/* Footer System Status */}
+      <div className="pt-3 border-t border-[#273449]/80 space-y-2 text-xs">
+        <div className="rounded-lg border border-[#273449] bg-[#111827] p-3 space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-slate-400 text-[11px] flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-success-500" />
+              PayPal Sandbox
+            </span>
+            <span className="font-mono text-[10px] text-success-500 font-semibold">Active</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-slate-400 text-[11px] flex items-center gap-1.5">
+              <Shield className="h-3 w-3 text-slate-400" />
+              Permission Engine
+            </span>
+            <span className="font-mono text-[10px] text-brand-400 font-semibold">Tier 4 Safe</span>
+          </div>
         </div>
-        <p className="mt-1 text-[10px] text-slate-400">
-          Financial transactions require human approval.
-        </p>
       </div>
     </aside>
   );
 };
+
+

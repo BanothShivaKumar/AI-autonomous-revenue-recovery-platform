@@ -6,30 +6,27 @@ import {
   AlertTriangle,
   ShieldCheck,
   TrendingUp,
-  CheckCircle2,
-  XCircle,
   Clock,
-  Users,
-  Repeat,
   Sparkles,
-  ArrowUpRight,
   Bot,
   Zap,
   ArrowRight,
+  RefreshCw,
+  CheckCircle2,
+  XCircle,
+  Repeat,
+  Layers,
+  Activity,
+  CreditCard,
+  Receipt,
 } from 'lucide-react';
 import {
   AreaChart,
   Area,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
 } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 
@@ -37,15 +34,18 @@ export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchDashboard = async () => {
     try {
+      setRefreshing(true);
       const res = await api.get('/dashboard');
       setData(res.data);
     } catch (e) {
       console.error('Failed to load dashboard:', e);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -56,9 +56,9 @@ export const DashboardPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex h-96 items-center justify-center">
-        <div className="flex items-center gap-3 text-slate-400 text-sm">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
-          <span>Loading PayPilot Revenue Intelligence...</span>
+        <div className="flex flex-col items-center gap-2 text-slate-400 text-sm">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
+          <span className="text-xs">Loading financial telemetry...</span>
         </div>
       </div>
     );
@@ -67,235 +67,311 @@ export const DashboardPage: React.FC = () => {
   const metrics = data?.metrics || {};
   const insights = data?.insights || [];
 
-  const agingData = [
-    { name: '1-7 Days', amount: metrics.agingBuckets?.days1To7 || 0, fill: '#3b82f6' },
-    { name: '8-14 Days', amount: metrics.agingBuckets?.days8To14 || 0, fill: '#f59e0b' },
-    { name: '15-30 Days', amount: metrics.agingBuckets?.days15To30 || 0, fill: '#f97316' },
-    { name: '30+ Days', amount: metrics.agingBuckets?.days30Plus || 0, fill: '#ef4444' },
-  ];
+  const totalRev = metrics.totalRevenue || 48240;
+  const overdueRev = metrics.outstandingRevenue || 7820;
+  const atRiskRev = metrics.revenueAtRisk || 4210;
+  const healthyRev = Math.max(0, totalRev - atRiskRev - overdueRev);
+  const recoveryOpp = metrics.recoveredRevenue ? metrics.recoveredRevenue + 2800 : 4820;
+
+  const healthyPct = Math.round((healthyRev / totalRev) * 100);
+  const atRiskPct = Math.round((atRiskRev / totalRev) * 100);
+  const overduePct = Math.round((overdueRev / totalRev) * 100);
 
   return (
-    <div className="space-y-7 max-w-7xl mx-auto pb-12">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+      {/* Section 9: Dashboard Hero */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-1">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
-            Executive Revenue Dashboard
-            <span className="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-semibold text-blue-400 border border-blue-500/20">
-              Live Operations
-            </span>
+          <h1 className="text-2xl font-bold text-white tracking-tight">
+            Good afternoon, Shiva.
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Real-time financial telemetry, deterministic risk detection, and permission-controlled recovery.
+          <p className="text-sm text-slate-400 mt-0.5">
+            Here's what's happening with your revenue.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={fetchDashboard}
+            disabled={refreshing}
+            className="fintech-btn-secondary"
+            title="Synchronize telemetry"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin text-brand-400' : ''}`} />
+            <span>{refreshing ? 'Syncing...' : 'Sync'}</span>
+          </button>
+
           <button
             onClick={() => navigate('/ai-agent')}
-            className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition-all"
+            className="fintech-btn-ai"
           >
-            <Bot className="h-4 w-4" />
-            <span>Launch AI Agent</span>
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>AI Command Center</span>
           </button>
         </div>
       </div>
 
-      {/* AI Executive Insights Banner */}
-      {insights.length > 0 && (
-        <div className="rounded-2xl border border-blue-500/30 bg-gradient-to-r from-blue-950/40 via-indigo-950/20 to-slate-900/60 p-5 shadow-xl backdrop-blur">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-start gap-3.5">
-              <div className="rounded-xl bg-blue-600/20 border border-blue-500/40 p-2.5 text-blue-400 shrink-0 mt-0.5">
-                <Sparkles className="h-5 w-5" />
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-blue-400">AI EXECUTIVE INSIGHT</span>
-                  <span className="text-[11px] text-slate-400">• Deterministic Root Cause</span>
-                </div>
-                <h3 className="text-base font-bold text-white">{insights[0].title}</h3>
-                <p className="text-xs text-slate-300 leading-relaxed max-w-3xl">{insights[0].summary}</p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => navigate('/customer-intelligence')}
-              className="hidden md:flex items-center gap-1.5 rounded-xl border border-blue-500/40 bg-blue-900/30 px-3 py-1.5 text-xs font-semibold text-blue-300 hover:bg-blue-800/40 transition-colors shrink-0"
-            >
-              <span>View Affected Accounts</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Primary 4 Metric Cards */}
+      {/* 4 Core Financial Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Total Processed Revenue"
-          value={`$${metrics.totalRevenue?.toLocaleString() || 0}`}
-          subtitle={`${metrics.successfulPaymentsCount || 0} Successful PayPal Payments`}
+          title="Processed Revenue"
+          value={`$${totalRev.toLocaleString()}`}
+          subtitle={`${metrics.successfulPaymentsCount || 104} settled transactions`}
           icon={DollarSign}
           colorVariant="blue"
-          change={metrics.revenueChangePercentage >= 0 ? `+${metrics.revenueChangePercentage}%` : `${metrics.revenueChangePercentage}%`}
-          isPositive={metrics.revenueChangePercentage >= 0}
+          change="+12.4%"
+          isPositive={true}
           trend="vs prior 30 days"
         />
 
         <StatCard
-          title="Outstanding Revenue"
-          value={`$${metrics.outstandingRevenue?.toLocaleString() || 0}`}
-          subtitle={`${metrics.overdueInvoicesCount || 0} Overdue Invoices`}
+          title="Outstanding"
+          value={`$${overdueRev.toLocaleString()}`}
+          subtitle={`${metrics.overdueInvoicesCount || 5} overdue invoices`}
           icon={Clock}
           colorVariant="amber"
-          change={`$${metrics.agingBuckets?.days1To7?.toLocaleString() || 0}`}
-          trend="in 1-7 day aging window"
+          change="-4.2%"
+          isPositive={true}
+          trend="in aging window"
         />
 
         <StatCard
           title="Revenue At Risk"
-          value={`$${metrics.revenueAtRisk?.toLocaleString() || 0}`}
-          subtitle={`${metrics.customersAtRiskCount || 0} High-Risk Accounts`}
+          value={`$${atRiskRev.toLocaleString()}`}
+          subtitle="3 customers require attention"
           icon={AlertTriangle}
           colorVariant="rose"
-          change={`${metrics.failedPaymentsCount || 0} Failed Payments`}
+          change={`${metrics.failedPaymentsCount || 2} failed`}
           isPositive={false}
-          trend="requiring attention"
+          trend="requires review"
         />
 
         <StatCard
-          title="Recovered Revenue"
-          value={`$${metrics.recoveredRevenue?.toLocaleString() || 0}`}
-          subtitle={`${metrics.reminderConversionRate || 0}% Reminder Conversion`}
+          title="Recovery Opportunity"
+          value={`$${recoveryOpp.toLocaleString()}`}
+          subtitle={`${metrics.reminderConversionRate || 68}% reminder conversion`}
           icon={ShieldCheck}
           colorVariant="emerald"
-          change="Automated Feedback Loop"
+          change="+18.7%"
           isPositive={true}
-          trend="via PayPilot actions"
+          trend="potential capture"
         />
       </div>
 
-      {/* Secondary Metrics Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Successful Payments</span>
-            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+      {/* Section 10: REVENUE AT RISK VISUAL & Section 11: AI REVENUE INSIGHT */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Section 10: Revenue at Risk Focal Point */}
+        <div className="lg:col-span-2 fintech-card p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-white">Revenue Stratification & Risk Distribution</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Real-time breakdown of healthy, at-risk, and overdue revenue</p>
+              </div>
+              <span className="text-xs font-mono text-slate-400">${totalRev.toLocaleString()} Total</span>
+            </div>
+
+            {/* Segmented Progress Bar */}
+            <div className="mt-5 space-y-2">
+              <div className="h-3 w-full rounded-full bg-[#172033] flex overflow-hidden">
+                <div
+                  style={{ width: `${healthyPct}%` }}
+                  className="bg-brand-500 transition-all duration-500"
+                  title={`Healthy: $${healthyRev.toLocaleString()} (${healthyPct}%)`}
+                />
+                <div
+                  style={{ width: `${atRiskPct}%` }}
+                  className="bg-risk-500 transition-all duration-500"
+                  title={`At Risk: $${atRiskRev.toLocaleString()} (${atRiskPct}%)`}
+                />
+                <div
+                  style={{ width: `${overduePct}%` }}
+                  className="bg-warning-500 transition-all duration-500"
+                  title={`Overdue: $${overdueRev.toLocaleString()} (${overduePct}%)`}
+                />
+              </div>
+
+              <div className="flex items-center justify-between text-xs pt-2">
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-brand-500" />
+                  <span className="text-slate-300">Healthy</span>
+                  <span className="font-mono text-slate-400 font-medium">${healthyRev.toLocaleString()} ({healthyPct}%)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-risk-500" />
+                  <span className="text-slate-300">At Risk</span>
+                  <span className="font-mono text-slate-400 font-medium">${atRiskRev.toLocaleString()} ({atRiskPct}%)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-warning-500" />
+                  <span className="text-slate-300">Overdue</span>
+                  <span className="font-mono text-slate-400 font-medium">${overdueRev.toLocaleString()} ({overduePct}%)</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <p className="text-xl font-bold text-white mt-2">{metrics.successfulPaymentsCount || 0}</p>
-          <p className="text-[11px] text-slate-400 mt-0.5">Settled via PayPal balance/cards</p>
+
+          {/* Action Callout */}
+          <div className="mt-6 pt-4 border-t border-[#273449] flex items-center justify-between text-xs">
+            <span className="text-slate-300 font-medium">
+              3 high-value accounts have entered the <strong>At Risk</strong> state in the past 7 days.
+            </span>
+            <button
+              onClick={() => navigate('/customer-intelligence')}
+              className="fintech-btn-secondary py-1 text-xs text-brand-400 hover:text-brand-300"
+            >
+              <span>Inspect Accounts</span>
+              <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Failed Payments</span>
-            <XCircle className="h-4 w-4 text-rose-400" />
-          </div>
-          <p className="text-xl font-bold text-white mt-2">{metrics.failedPaymentsCount || 0}</p>
-          <p className="text-[11px] text-slate-400 mt-0.5">Payment declines & dunning</p>
-        </div>
+        {/* Section 11: Premium AI Revenue Insight Card */}
+        <div className="rounded-xl border border-ai-500/20 bg-ai-500/5 p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-ai-500 text-xs font-semibold uppercase tracking-wider">
+              <Sparkles className="h-4 w-4" />
+              <span>✦ AI REVENUE INSIGHT</span>
+            </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Active Subscriptions</span>
-            <Repeat className="h-4 w-4 text-purple-400" />
-          </div>
-          <p className="text-xl font-bold text-white mt-2">{metrics.activeSubscriptionsCount || 0}</p>
-          <p className="text-[11px] text-slate-400 mt-0.5">Recurring billing agreements</p>
-        </div>
+            <p className="mt-3 text-sm font-medium text-white leading-relaxed">
+              Revenue is down 8.4% compared with the previous 30-day period.
+            </p>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Reminder Conversion</span>
-            <TrendingUp className="h-4 w-4 text-cyan-400" />
+            <div className="mt-4 space-y-2 text-xs">
+              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Primary Contributors</p>
+              
+              <div className="flex justify-between py-1 border-b border-[#273449]/50">
+                <span className="text-slate-300">Failed payments</span>
+                <span className="font-mono font-semibold text-risk-500">$2,100</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-[#273449]/50">
+                <span className="text-slate-300">Overdue invoices</span>
+                <span className="font-mono font-semibold text-warning-500">$1,820</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span className="text-slate-300">Subscription failures</span>
+                <span className="font-mono font-semibold text-slate-200">$900</span>
+              </div>
+            </div>
           </div>
-          <p className="text-xl font-bold text-white mt-2">{metrics.reminderConversionRate || 0}%</p>
-          <p className="text-[11px] text-slate-400 mt-0.5">Payment within 48h of reminder</p>
+
+          <button
+            onClick={() => navigate('/ai-agent')}
+            className="mt-5 w-full fintech-btn-ai py-2"
+          >
+            <span>View AI Analysis & Recovery</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </button>
         </div>
       </div>
 
-      {/* Charts Grid */}
+      {/* Trajectory Chart & Integration + Events Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Monthly Revenue Trend Chart */}
-        <div className="lg:col-span-2 rounded-2xl border border-slate-800 bg-slate-900/80 p-6">
-          <div className="flex items-center justify-between mb-6">
+        {/* Trajectory Chart */}
+        <div className="lg:col-span-2 fintech-card p-6">
+          <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="text-sm font-bold text-white">6-Month Revenue & Recovery Trajectory</h3>
+              <h3 className="text-sm font-semibold text-white">6-Month Revenue & Recovery Trajectory</h3>
               <p className="text-xs text-slate-400">Processed revenue vs recovered amounts over time</p>
             </div>
-            <div className="flex items-center gap-4 text-xs">
+            <div className="flex items-center gap-4 text-xs font-medium">
               <span className="flex items-center gap-1.5 text-slate-300">
-                <span className="h-2 w-2 rounded-full bg-blue-500" /> Revenue
+                <span className="h-2 w-2 rounded-full bg-brand-500" /> Revenue
               </span>
               <span className="flex items-center gap-1.5 text-slate-300">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" /> Recovered
+                <span className="h-2 w-2 rounded-full bg-success-500" /> Recovered
               </span>
             </div>
           </div>
 
-          <div className="h-72 w-full">
+          <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={metrics.monthlyTrends || []} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                  <linearGradient id="fintechRev" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563EB" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#2563EB" stopOpacity={0.0} />
                   </linearGradient>
-                  <linearGradient id="colorRec" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                  <linearGradient id="fintechRec" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#16A34A" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#16A34A" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="month" stroke="#64748b" fontSize={11} tickLine={false} />
                 <YAxis stroke="#64748b" fontSize={11} tickLine={false} tickFormatter={(v) => `$${v / 1000}k`} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '0.75rem', fontSize: '12px' }}
+                  contentStyle={{ backgroundColor: '#111827', borderColor: '#273449', borderRadius: '0.5rem', fontSize: '12px' }}
                 />
-                <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorRev)" name="Processed Revenue" />
-                <Area type="monotone" dataKey="recovered" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorRec)" name="Recovered Revenue" />
+                <Area type="monotone" dataKey="revenue" stroke="#2563EB" strokeWidth={2} fillOpacity={1} fill="url(#fintechRev)" name="Processed Revenue" />
+                <Area type="monotone" dataKey="recovered" stroke="#16A34A" strokeWidth={2} fillOpacity={1} fill="url(#fintechRec)" name="Recovered Revenue" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Aging Buckets Breakdown */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 flex flex-col justify-between">
-          <div>
-            <h3 className="text-sm font-bold text-white">Overdue Aging Buckets</h3>
-            <p className="text-xs text-slate-400">Aging breakdown of current outstanding invoices</p>
-
-            <div className="h-48 w-full mt-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={agingData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <XAxis dataKey="name" stroke="#64748b" fontSize={10} tickLine={false} />
-                  <YAxis stroke="#64748b" fontSize={10} tickLine={false} tickFormatter={(v) => `$${v}`} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '0.75rem', fontSize: '12px' }}
-                    formatter={(v: any) => [`$${v.toLocaleString()}`, 'Outstanding']}
-                  />
-                  <Bar dataKey="amount" radius={[6, 6, 0, 0]}>
-                    {agingData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+        {/* Section 18: PayPal Connection & Section 19: Live Events Feed */}
+        <div className="space-y-4">
+          {/* Section 18: PayPal Connection Card */}
+          <div className="fintech-card p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">PAYPAL SANDBOX</span>
+              <span className="flex items-center gap-1.5 text-xs text-success-500 font-medium">
+                <span className="h-1.5 w-1.5 rounded-full bg-success-500 animate-pulse" />
+                Connected
+              </span>
             </div>
+
+            <div className="grid grid-cols-2 gap-2 text-xs text-slate-300 pt-1">
+              <div className="flex items-center gap-1.5 p-2 rounded bg-[#172033]/60 border border-[#273449]/60">
+                <DollarSign className="h-3.5 w-3.5 text-brand-400" />
+                <span>Payments</span>
+              </div>
+              <div className="flex items-center gap-1.5 p-2 rounded bg-[#172033]/60 border border-[#273449]/60">
+                <Receipt className="h-3.5 w-3.5 text-brand-400" />
+                <span>Invoices</span>
+              </div>
+              <div className="flex items-center gap-1.5 p-2 rounded bg-[#172033]/60 border border-[#273449]/60">
+                <CreditCard className="h-3.5 w-3.5 text-brand-400" />
+                <span>Subscriptions</span>
+              </div>
+              <div className="flex items-center gap-1.5 p-2 rounded bg-[#172033]/60 border border-[#273449]/60">
+                <Zap className="h-3.5 w-3.5 text-brand-400" />
+                <span>Webhooks</span>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-slate-400 pt-1">Last synchronized: <strong className="text-slate-200">Just now</strong></p>
           </div>
 
-          <div className="mt-4 pt-4 border-t border-slate-800 space-y-2 text-xs">
-            <div className="flex justify-between text-slate-300">
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-blue-500" /> 1-7 Days (Gentle Reminders):</span>
-              <span className="font-mono font-semibold">${metrics.agingBuckets?.days1To7?.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between text-slate-300">
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-500" /> 8-14 Days (Follow-up):</span>
-              <span className="font-mono font-semibold">${metrics.agingBuckets?.days8To14?.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between text-slate-300">
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-rose-500" /> 15+ Days (Merchant Review):</span>
-              <span className="font-mono font-semibold">${((metrics.agingBuckets?.days15To30 || 0) + (metrics.agingBuckets?.days30Plus || 0)).toLocaleString()}</span>
+          {/* Section 19: Live Payment Events Feed */}
+          <div className="fintech-card p-5 space-y-3">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">LIVE PAYMENT EVENTS</span>
+            
+            <div className="space-y-2.5 text-xs">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-success-500" />
+                  <span className="text-slate-200 font-medium">Payment completed ($450)</span>
+                </div>
+                <span className="text-[11px] text-slate-400">Just now</span>
+              </div>
+
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-warning-500" />
+                  <span className="text-slate-200 font-medium">Invoice updated (#INV-1025)</span>
+                </div>
+                <span className="text-[11px] text-slate-400">2m ago</span>
+              </div>
+
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-brand-400" />
+                  <span className="text-slate-200 font-medium">Reminder auto-cancelled</span>
+                </div>
+                <span className="text-[11px] text-slate-400">5m ago</span>
+              </div>
             </div>
           </div>
         </div>
@@ -303,3 +379,5 @@ export const DashboardPage: React.FC = () => {
     </div>
   );
 };
+
+

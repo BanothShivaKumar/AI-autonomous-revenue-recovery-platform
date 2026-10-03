@@ -29,7 +29,7 @@ export const TransactionsPage: React.FC = () => {
     return (
       <div className="flex h-96 items-center justify-center">
         <div className="flex items-center gap-3 text-slate-400 text-sm">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
           <span>Synchronizing PayPal Transaction Logs...</span>
         </div>
       </div>
@@ -38,7 +38,7 @@ export const TransactionsPage: React.FC = () => {
 
   const filtered = transactions.filter((t) => {
     const matchesSearch =
-      t.paypalTransactionId.toLowerCase().includes(search.toLowerCase()) ||
+      t.paypalTransactionId?.toLowerCase().includes(search.toLowerCase()) ||
       t.customer?.name?.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = filterStatus === 'ALL' || t.status === filterStatus;
     return matchesSearch && matchesStatus;
@@ -49,9 +49,9 @@ export const TransactionsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
-            PayPal Transactions Telemetry
-            <span className="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-semibold text-blue-400 border border-blue-500/20">
+          <h1 className="text-2xl font-bold text-slate-100 tracking-tight flex items-center gap-2.5">
+            PayPal Transactions Ledger
+            <span className="rounded-full bg-brand-500/10 px-2.5 py-0.5 text-xs font-bold text-brand-400 border border-brand-500/30">
               {transactions.length} Captured
             </span>
           </h1>
@@ -61,25 +61,25 @@ export const TransactionsPage: React.FC = () => {
         </div>
 
         {/* Filters */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <div className="relative w-64">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
+            <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search transaction ID or customer..."
-              className="w-full rounded-xl border border-slate-800 bg-slate-900 pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+              className="fintech-input pl-10 pr-4 py-2 text-xs"
             />
           </div>
 
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-xs text-white focus:border-blue-500 focus:outline-none"
+            className="fintech-input px-3 py-2 text-xs"
           >
             <option value="ALL">All Statuses</option>
-            <option value="COMPLETED">Completed</option>
+            <option value="SUCCESS">Success</option>
             <option value="FAILED">Failed</option>
             <option value="PENDING">Pending</option>
           </select>
@@ -87,58 +87,61 @@ export const TransactionsPage: React.FC = () => {
       </div>
 
       {/* Transactions Table */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/90 overflow-hidden shadow-xl">
+      <div className="fintech-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950/80 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <thead className="bg-fintech-bg/70 border-b border-fintech-border text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               <tr>
-                <th className="px-6 py-3.5">PayPal TXN ID</th>
-                <th className="px-6 py-3.5">Customer</th>
-                <th className="px-6 py-3.5">Amount</th>
-                <th className="px-6 py-3.5">Status</th>
-                <th className="px-6 py-3.5">Method</th>
-                <th className="px-6 py-3.5">Date</th>
-                <th className="px-6 py-3.5">Decline / Risk Note</th>
+                <th className="p-4">Transaction ID</th>
+                <th className="p-4">Customer</th>
+                <th className="p-4">Amount</th>
+                <th className="p-4">Type</th>
+                <th className="p-4">Status</th>
+                <th className="p-4">Timestamp</th>
+                <th className="p-4">Decline Diagnostic</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80 text-slate-200">
+            <tbody className="divide-y divide-fintech-border/80">
               {filtered.map((t) => (
-                <tr key={t.id} className="hover:bg-slate-800/40 transition-colors">
-                  <td className="px-6 py-4 font-mono font-bold text-blue-400">
+                <tr key={t.id} className="hover:bg-fintech-secondary/40 transition-colors">
+                  <td className="p-4 font-mono font-bold text-slate-100">
                     {t.paypalTransactionId}
                   </td>
-                  <td
-                    onClick={() => t.customer && navigate(`/customers/${t.customer.id}`)}
-                    className="px-6 py-4 font-semibold text-slate-200 hover:text-blue-400 cursor-pointer"
-                  >
-                    {t.customer?.name || 'Direct Payer'}
-                  </td>
-                  <td className="px-6 py-4 font-mono font-bold text-white">
-                    ${t.amount.toLocaleString()} {t.currency}
-                  </td>
-                  <td className="px-6 py-4">
+                  <td className="p-4">
                     <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                        t.status === 'COMPLETED'
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                          : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
-                      }`}
+                      onClick={() => navigate(`/customers/${t.customerId}`)}
+                      className="font-semibold text-slate-200 hover:text-brand-400 cursor-pointer"
                     >
-                      <span className={`h-1.5 w-1.5 rounded-full ${t.status === 'COMPLETED' ? 'bg-emerald-400' : 'bg-rose-400'}`} />
-                      {t.status}
+                      {t.customer?.name}
                     </span>
                   </td>
-                  <td className="px-6 py-4 font-mono text-xs text-slate-400">
-                    {t.paymentMethod}
+                  <td className="p-4 font-mono font-bold text-slate-100">
+                    ${t.amount?.toLocaleString()} {t.currency}
                   </td>
-                  <td className="px-6 py-4 font-mono text-xs text-slate-400">
-                    {new Date(t.transactionDate).toLocaleDateString()}
+                  <td className="p-4 font-mono text-slate-300 text-[11px]">
+                    {t.type}
                   </td>
-                  <td className="px-6 py-4 text-[11px] text-slate-300">
+                  <td className="p-4">
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+                        t.status === 'SUCCESS'
+                          ? 'bg-success-500/10 text-success-400 border-success-500/30'
+                          : t.status === 'FAILED'
+                          ? 'bg-risk-500/10 text-risk-400 border-risk-500/30'
+                          : 'bg-warning-500/10 text-warning-400 border-warning-500/30'
+                      }`}
+                    >
+                      ● {t.status}
+                    </span>
+                  </td>
+                  <td className="p-4 font-mono text-slate-400 text-[11px]">
+                    {new Date(t.createdAt).toLocaleString()}
+                  </td>
+                  <td className="p-4 text-slate-400 text-[11px]">
                     {t.failureReason ? (
-                      <span className="text-rose-400 font-semibold">{t.failureReason}</span>
+                      <span className="text-risk-400 font-mono">{t.failureReason}</span>
                     ) : (
-                      <span className="text-emerald-400">Normal Settlement</span>
+                      <span className="text-slate-600">—</span>
                     )}
                   </td>
                 </tr>

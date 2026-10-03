@@ -13,6 +13,8 @@ import {
   Bot,
   Receipt,
   ArrowRight,
+  Sparkles,
+  Check,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -72,7 +74,7 @@ export const DemoSimulatorPage: React.FC = () => {
     return (
       <div className="flex h-96 items-center justify-center">
         <div className="flex items-center gap-3 text-slate-400 text-sm">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
           <span>Connecting to PayPal Sandbox & Demo Control Room...</span>
         </div>
       </div>
@@ -80,141 +82,155 @@ export const DemoSimulatorPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-7 max-w-7xl mx-auto pb-16">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
+          <h1 className="text-2xl font-bold text-slate-100 tracking-tight flex items-center gap-2.5">
             Hackathon Demo & PayPal Webhook Lab
-            <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-400 border border-amber-500/20">
+            <span className="rounded-full bg-brand-500/10 px-2.5 py-0.5 text-xs font-bold text-brand-400 border border-brand-500/30">
               Interactive Test Harness
             </span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Test real-world scenarios: deterministic behavioral deterioration, permission authorization blocks, and instant reminder auto-cancellation upon payment.
+            Test real-world scenarios: deterministic behavioral deterioration, permission authorization safeguards, and instant reminder auto-cancellation upon payment.
           </p>
         </div>
 
         <button
           onClick={handleResetData}
           disabled={seeding}
-          className="flex items-center gap-2 rounded-xl bg-slate-800 hover:bg-slate-700 px-4 py-2 text-xs font-bold text-white transition-colors"
+          className="fintech-btn-secondary px-3.5 py-2 text-xs font-semibold flex items-center gap-2 self-start sm:self-auto"
         >
-          <RotateCcw className={`h-4 w-4 ${seeding ? 'animate-spin' : ''}`} />
-          <span>{seeding ? 'Re-seeding Nova Digital...' : 'Reset Demo Business (Nova Digital Studio)'}</span>
+          <RotateCcw className={`h-4 w-4 ${seeding ? 'animate-spin text-brand-400' : ''}`} />
+          <span>{seeding ? 'Reseeding...' : 'Reset Demo State'}</span>
         </button>
       </div>
 
-      {/* Demo Scenario Highlight Card */}
-      <div className="rounded-2xl border border-blue-500/30 bg-slate-900/90 p-6 shadow-2xl space-y-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-blue-600/20 border border-blue-500/30 p-2.5 text-blue-400 font-bold">
-              <Workflow className="h-6 w-6" />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-white">Active Evaluation Scenario: Alex Technologies</h3>
-              <p className="text-xs text-slate-400">
-                Key customer whose payment discipline recently degraded from 1.4d historical delay to 6.2d delay with 2 recent payment declines.
-              </p>
-            </div>
+      {/* 5-Step Evaluation Journey (Judge Walkthrough) */}
+      <div className="fintech-card p-6">
+        <h2 className="text-sm font-bold text-slate-100 flex items-center gap-2 mb-4">
+          <Workflow className="h-4 w-4 text-brand-400" />
+          <span>Evaluation Journey: TRUST → INTELLIGENCE → ACTION → CONTROL → RECOVERY</span>
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+          <div className="p-3.5 rounded-xl bg-fintech-bg border border-fintech-border">
+            <span className="text-[10px] font-bold text-brand-400 uppercase">1. Dashboard Hero</span>
+            <p className="text-xs font-semibold text-slate-200 mt-1">Revenue At Risk</p>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Focal bar showing healthy, at-risk, and overdue revenue breakdown.
+            </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/30">
-              {status?.counts?.customers || 32} Customers
-            </span>
-            <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-bold text-blue-400 border border-blue-500/30">
-              {status?.counts?.transactions || 100}+ Transactions
-            </span>
+          <div className="p-3.5 rounded-xl bg-fintech-bg border border-fintech-border">
+            <span className="text-[10px] font-bold text-ai-400 uppercase">2. Customer 360</span>
+            <p className="text-xs font-semibold text-slate-200 mt-1">"What Changed?"</p>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Side-by-side baseline vs recent 30-day telemetry shift.
+            </p>
+          </div>
+
+          <div className="p-3.5 rounded-xl bg-fintech-bg border border-fintech-border">
+            <span className="text-[10px] font-bold text-ai-400 uppercase">3. Command Center</span>
+            <p className="text-xs font-semibold text-slate-200 mt-1">AI Execution Trace</p>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Multi-step deterministic tool execution and reasoning.
+            </p>
+          </div>
+
+          <div className="p-3.5 rounded-xl bg-fintech-bg border border-fintech-border">
+            <span className="text-[10px] font-bold text-warning-400 uppercase">4. Action Center</span>
+            <p className="text-xs font-semibold text-slate-200 mt-1">Permission Engine</p>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Financial and communication actions require human approval.
+            </p>
+          </div>
+
+          <div className="p-3.5 rounded-xl bg-fintech-bg border border-fintech-border">
+            <span className="text-[10px] font-bold text-success-400 uppercase">5. Webhook Loop</span>
+            <p className="text-xs font-semibold text-slate-200 mt-1">Success Moment</p>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Payment verified → reminders automatically cancelled.
+            </p>
           </div>
         </div>
+      </div>
 
-        {/* 3 Step Interactive Testing Flow */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-          {/* Action 1 */}
-          <div className="rounded-xl border border-slate-800 bg-slate-950 p-5 space-y-3 flex flex-col justify-between">
+      {/* Interactive Scenario Card */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Test Subject: Alex Technologies */}
+        <div className="fintech-card p-6 space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-fintech-border">
             <div>
-              <div className="flex items-center gap-2 text-blue-400 font-bold text-xs">
-                <span>1. Behavioral Analysis</span>
-              </div>
-              <h4 className="text-sm font-bold text-white mt-1">Inspect "What Changed?"</h4>
-              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                Open Alex Technologies' 360 profile to observe deterministic delta calculations comparing historical vs recent activity.
-              </p>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-ai-400">Primary Demo Subject</span>
+              <h3 className="text-base font-bold text-slate-100">Alex Technologies (INV-1024)</h3>
             </div>
-            <button
-              onClick={() => status?.demoHighlight?.alexCustomerId && navigate(`/customers/${status.demoHighlight.alexCustomerId}`)}
-              className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600 px-3 py-2 text-xs font-bold text-blue-300 hover:text-white transition-colors"
-            >
-              <span>Inspect Alex Profile</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-warning-500/10 text-warning-400 border border-warning-500/30">
+              High Value • Deteriorating
+            </span>
           </div>
 
-          {/* Action 2 */}
-          <div className="rounded-xl border border-slate-800 bg-slate-950 p-5 space-y-3 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-2 text-amber-400 font-bold text-xs">
-                <span>2. AI Recovery Staging</span>
-              </div>
-              <h4 className="text-sm font-bold text-white mt-1">Stage & Review Reminder</h4>
-              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                The Recovery Agent prepares a reminder for invoice #{status?.demoHighlight?.alexInvoiceNumber || 'INV-1024'} and routes to Action Center.
-              </p>
-            </div>
+          <p className="text-xs text-slate-300 leading-relaxed">
+            Alex Technologies is a loyal $18k+ customer who suddenly experienced payment delay increase (1.4d → 6.2d) and 2 invoice declines. PayPilot automatically drafted a tailored reminder, but staged it in the Action Center awaiting human approval.
+          </p>
+
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              onClick={() => navigate('/customers/cust-alex-tech')}
+              className="fintech-btn-secondary px-3.5 py-2 text-xs font-semibold flex items-center gap-1.5"
+            >
+              <span>View Customer 360</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+
             <button
               onClick={() => navigate('/action-center')}
-              className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-600 px-3 py-2 text-xs font-bold text-amber-300 hover:text-white transition-colors"
+              className="fintech-btn-primary px-3.5 py-2 text-xs font-semibold flex items-center gap-1.5"
             >
               <ShieldCheck className="h-3.5 w-3.5" />
-              <span>Review Action Center</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-
-          {/* Action 3 */}
-          <div className="rounded-xl border border-slate-800 bg-slate-950 p-5 space-y-3 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
-                <span>3. PayPal Webhook Feedback Loop</span>
-              </div>
-              <h4 className="text-sm font-bold text-white mt-1">Simulate PayPal Settlement</h4>
-              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                Dispatch verified webhook payment event. Observe invoice marked PAID and future scheduled reminders automatically cancelled!
-              </p>
-            </div>
-            <button
-              onClick={handleSimulatePayment}
-              disabled={simulatingWebhook}
-              className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3 py-2 text-xs font-bold text-white transition-colors"
-            >
-              <Zap className="h-3.5 w-3.5" />
-              <span>{simulatingWebhook ? 'Dispatched...' : 'Simulate $450 Payment'}</span>
+              <span>Inspect Action Center</span>
             </button>
           </div>
         </div>
 
-        {/* Live Simulation Response Output */}
-        {webhookResult && (
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/40 p-5 space-y-3 animate-in fade-in">
-            <div className="flex items-center justify-between text-emerald-400 text-xs font-bold">
-              <span className="flex items-center gap-2">
+        {/* Real-time Webhook Dispatcher */}
+        <div className="fintech-card p-6 space-y-4">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-success-400">Feedback Loop Trigger</span>
+            <h3 className="text-base font-bold text-slate-100">Simulate Payment Received Webhook</h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Dispatches `PAYMENT.CAPTURE.COMPLETED` for $450 against invoice #INV-1024 to verify instant reminder cancellation.
+            </p>
+          </div>
+
+          <button
+            onClick={handleSimulatePayment}
+            disabled={simulatingWebhook}
+            className="fintech-btn-primary w-full py-2.5 text-xs font-semibold flex items-center justify-center gap-2"
+          >
+            {simulatingWebhook ? (
+              <span>Verifying Webhook Event...</span>
+            ) : (
+              <>
+                <Zap className="h-4 w-4" />
+                <span>Simulate $450 Payment from Alex Technologies</span>
+              </>
+            )}
+          </button>
+
+          {webhookResult && (
+            <div className="p-4 rounded-xl bg-success-500/5 border border-success-500/30 text-xs space-y-2 animate-fadeIn">
+              <div className="flex items-center gap-2 text-success-400 font-bold">
                 <CheckCircle2 className="h-4 w-4" />
                 <span>{webhookResult.message}</span>
-              </span>
-              <button
-                onClick={() => navigate('/reminders')}
-                className="underline hover:text-white"
-              >
-                Verify Cancelled Reminders →
-              </button>
+              </div>
+              <p className="text-slate-300 text-[11px]">
+                Active reminders for Alex Technologies have been automatically transitioned to <strong className="text-slate-100">CANCELLED</strong> to prevent merchant-client embarrassment.
+              </p>
             </div>
-            <div className="rounded-lg bg-slate-950 p-3 text-[11px] font-mono text-slate-300 overflow-x-auto max-h-48">
-              <pre>{JSON.stringify(webhookResult.mockEvent, null, 2)}</pre>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

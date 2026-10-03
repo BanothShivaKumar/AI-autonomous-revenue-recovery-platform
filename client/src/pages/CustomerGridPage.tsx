@@ -4,7 +4,7 @@ import { ColDef } from 'ag-grid-community';
 import { api } from '../api/client';
 import { useNavigate } from 'react-router-dom';
 import { SegmentBadge, RiskBadge } from '../components/common/Badges';
-import { Search, Sparkles, UserCheck, ArrowRight, Download } from 'lucide-react';
+import { Search, Sparkles, UserCheck, ArrowRight, Download, RefreshCw, Layers } from 'lucide-react';
 
 export const CustomerGridPage: React.FC = () => {
   const navigate = useNavigate();
@@ -32,14 +32,17 @@ export const CustomerGridPage: React.FC = () => {
     () => [
       {
         field: 'name',
-        headerName: 'Customer Name',
-        minWidth: 200,
+        headerName: 'Customer & Account',
+        minWidth: 220,
         pinned: 'left',
         cellRenderer: (params: any) => {
           if (!params.data) return null;
           return (
             <div className="flex flex-col justify-center h-full">
-              <span className="font-semibold text-white hover:text-blue-400 cursor-pointer" onClick={() => navigate(`/customers/${params.data.customerId}`)}>
+              <span
+                className="font-bold text-slate-100 hover:text-brand-400 transition-colors cursor-pointer"
+                onClick={() => navigate(`/customers/${params.data.customerId}`)}
+              >
                 {params.value}
               </span>
               <span className="text-[11px] text-slate-400 truncate leading-none">
@@ -52,7 +55,7 @@ export const CustomerGridPage: React.FC = () => {
       {
         field: 'suggestedSegment',
         headerName: 'Segment',
-        width: 160,
+        width: 170,
         cellRenderer: (params: any) => {
           if (!params.value) return null;
           return (
@@ -64,8 +67,8 @@ export const CustomerGridPage: React.FC = () => {
       },
       {
         field: 'riskScore',
-        headerName: 'Risk Score',
-        width: 150,
+        headerName: 'Risk Stratification',
+        width: 160,
         sort: 'desc',
         cellRenderer: (params: any) => {
           if (params.value === undefined) return null;
@@ -81,7 +84,7 @@ export const CustomerGridPage: React.FC = () => {
         headerName: 'Lifetime Revenue',
         width: 150,
         valueFormatter: (params) => `$${params.value?.toLocaleString() || 0}`,
-        cellClass: 'font-mono text-slate-200 font-semibold',
+        cellClass: 'font-mono text-slate-100 font-bold',
       },
       {
         field: 'revenue30d',
@@ -106,7 +109,9 @@ export const CustomerGridPage: React.FC = () => {
           return (
             <div className="flex items-center h-full font-mono">
               {val > 0 ? (
-                <span className="font-bold text-amber-400">${val.toLocaleString()}</span>
+                <span className="font-bold text-warning-400 bg-warning-500/10 px-2 py-0.5 rounded border border-warning-500/20">
+                  ${val.toLocaleString()}
+                </span>
               ) : (
                 <span className="text-slate-500">$0</span>
               )}
@@ -123,9 +128,9 @@ export const CustomerGridPage: React.FC = () => {
           const delta = params.data?.delayChangeDays || 0;
           return (
             <div className="flex items-center gap-1.5 h-full font-mono text-xs">
-              <span>{delay.toFixed(1)}d</span>
+              <span className="font-semibold text-slate-200">{delay.toFixed(1)}d</span>
               {delta > 2.0 && (
-                <span className="text-rose-400 text-[10px] font-bold" title={`Increased by +${delta.toFixed(1)}d recently`}>
+                <span className="text-risk-400 text-[10px] font-bold" title={`Increased by +${delta.toFixed(1)}d recently`}>
                   (+{delta.toFixed(1)}d)
                 </span>
               )}
@@ -141,7 +146,7 @@ export const CustomerGridPage: React.FC = () => {
           const rate = params.value || 0;
           return (
             <div className="flex items-center h-full font-mono text-xs">
-              <span className={rate >= 80 ? 'text-emerald-400 font-semibold' : 'text-amber-400 font-semibold'}>
+              <span className={rate >= 80 ? 'text-success-400 font-bold' : 'text-warning-400 font-bold'}>
                 {rate.toFixed(0)}%
               </span>
             </div>
@@ -157,7 +162,7 @@ export const CustomerGridPage: React.FC = () => {
           return (
             <div className="flex items-center h-full font-mono text-xs">
               {count > 0 ? (
-                <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
+                <span className="px-2 py-0.5 rounded bg-risk-500/10 text-risk-400 font-bold border border-risk-500/20">
                   {count} failed
                 </span>
               ) : (
@@ -176,7 +181,7 @@ export const CustomerGridPage: React.FC = () => {
           const sent = params.data?.remindersSentCount || 0;
           if (sent === 0) return <span className="text-slate-500 text-xs">—</span>;
           return (
-            <div className="flex items-center h-full font-mono text-xs text-cyan-400 font-semibold">
+            <div className="flex items-center h-full font-mono text-xs text-ai-400 font-bold">
               {rate.toFixed(0)}% ({sent} sent)
             </div>
           );
@@ -184,7 +189,7 @@ export const CustomerGridPage: React.FC = () => {
       },
       {
         headerName: 'Action',
-        width: 160,
+        width: 130,
         pinned: 'right',
         cellRenderer: (params: any) => {
           if (!params.data) return null;
@@ -192,7 +197,7 @@ export const CustomerGridPage: React.FC = () => {
             <div className="flex items-center gap-1.5 h-full">
               <button
                 onClick={() => navigate(`/customers/${params.data.customerId}`)}
-                className="flex items-center gap-1 rounded bg-blue-600/20 hover:bg-blue-600 px-2 py-1 text-[11px] font-semibold text-blue-300 hover:text-white border border-blue-500/30 transition-colors"
+                className="flex items-center gap-1 rounded-lg bg-brand-500/10 hover:bg-brand-500/20 px-2.5 py-1 text-[11px] font-semibold text-brand-400 border border-brand-500/30 transition-colors"
               >
                 <span>Profile</span>
                 <ArrowRight className="h-3 w-3" />
@@ -215,16 +220,18 @@ export const CustomerGridPage: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
-            Customer Analytics (AG Grid)
-            <span className="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-semibold text-blue-400 border border-blue-500/20">
-              {customers.length} Accounts
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl font-bold text-slate-100 tracking-tight">
+              Customer Telemetry Grid
+            </h1>
+            <span className="rounded-full bg-brand-500/10 px-2.5 py-0.5 text-xs font-bold text-brand-400 border border-brand-500/30">
+              {customers.length} Accounts Synchronized
             </span>
-          </h1>
+          </div>
           <p className="text-xs text-slate-400 mt-1">
             Sortable, filterable enterprise data grid with behavioral indicators and risk stratification.
           </p>
@@ -232,22 +239,22 @@ export const CustomerGridPage: React.FC = () => {
 
         {/* Quick Search */}
         <div className="flex items-center gap-3">
-          <div className="relative w-72">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
+          <div className="relative w-72 sm:w-80">
+            <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
             <input
               type="text"
               value={quickFilterText}
               onChange={(e) => setQuickFilterText(e.target.value)}
               placeholder="Search customer, company, segment..."
-              className="w-full rounded-xl border border-slate-800 bg-slate-900 pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+              className="fintech-input pl-10 pr-4 py-2 text-xs"
             />
           </div>
         </div>
       </div>
 
       {/* Grid Container */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-2 shadow-2xl">
-        <div className="ag-theme-quartz-dark h-[620px] w-full rounded-xl overflow-hidden">
+      <div className="fintech-card p-3 shadow-card">
+        <div className="ag-theme-quartz-dark h-[620px] w-full rounded-xl overflow-hidden border border-fintech-border">
           <AgGridReact
             ref={gridRef}
             rowData={customers}

@@ -14,6 +14,10 @@ import {
   ArrowRight,
   RefreshCw,
   FileEdit,
+  ShieldCheck,
+  Lock,
+  Check,
+  Info,
 } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 
@@ -24,6 +28,7 @@ export const ActionCenterPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'PENDING' | 'HISTORIC'>('PENDING');
   const [selectedAction, setSelectedAction] = useState<any>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [permissionInfoModalOpen, setPermissionInfoModalOpen] = useState(false);
   const [editedMessage, setEditedMessage] = useState('');
   const [processingId, setProcessingId] = useState<string | null>(null);
 
@@ -85,9 +90,9 @@ export const ActionCenterPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex h-96 items-center justify-center">
-        <div className="flex items-center gap-3 text-slate-400 text-sm">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
-          <span>Verifying Permission Engine Staged Actions...</span>
+        <div className="flex flex-col items-center gap-3 text-slate-400 text-sm">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
+          <span className="font-semibold text-slate-300">Evaluating Permission Engine Actions...</span>
         </div>
       </div>
     );
@@ -98,41 +103,43 @@ export const ActionCenterPage: React.FC = () => {
   const displayList = activeTab === 'PENDING' ? pendingActions : historicActions;
 
   return (
-    <div className="space-y-7 max-w-7xl mx-auto pb-16">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
-            Permission & Action Approval Center
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl font-bold text-slate-100 tracking-tight">
+              Action & Permission Center
+            </h1>
             {pendingActions.length > 0 && (
-              <span className="rounded-full bg-rose-500/20 px-2.5 py-0.5 text-xs font-bold text-rose-300 border border-rose-500/30">
-                {pendingActions.length} Actions Awaiting Review
+              <span className="rounded-full bg-warning-500/10 px-2.5 py-0.5 text-xs font-bold text-warning-400 border border-warning-500/30">
+                {pendingActions.length} Requires Approval
               </span>
             )}
-          </h1>
+          </div>
           <p className="text-xs text-slate-400 mt-1">
-            Human-in-the-loop permission gateway. AI models can propose recovery actions, but never execute unauthorized operations.
+            Human-in-the-loop permission gateway. AI assists with intelligence, while humans explicitly authorize financial and customer communication decisions.
           </p>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center rounded-xl border border-slate-800 bg-slate-900 p-1">
+        <div className="flex items-center rounded-xl border border-fintech-border bg-fintech-bg p-1 self-start sm:self-auto">
           <button
             onClick={() => setActiveTab('PENDING')}
-            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+            className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all ${
               activeTab === 'PENDING'
-                ? 'bg-blue-600 text-white shadow'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-brand-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             Pending Review ({pendingActions.length})
           </button>
           <button
             onClick={() => setActiveTab('HISTORIC')}
-            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+            className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all ${
               activeTab === 'HISTORIC'
-                ? 'bg-blue-600 text-white shadow'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-brand-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             Action History ({historicActions.length})
@@ -140,16 +147,48 @@ export const ActionCenterPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Security & Permission Engine Visible Ribbon */}
+      <div className="fintech-card p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-400">
+            <ShieldCheck className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-xs font-bold text-slate-200 uppercase tracking-wider">AI PERMISSION ENGINE</p>
+            <p className="text-[11px] text-slate-400">Deterministic security tiers active on PayPal Sandbox integration</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="px-2.5 py-1 rounded-md bg-fintech-bg border border-fintech-border text-[11px] font-mono text-success-400 flex items-center gap-1">
+            <Check className="h-3 w-3" /> READ
+          </span>
+          <span className="px-2.5 py-1 rounded-md bg-fintech-bg border border-fintech-border text-[11px] font-mono text-success-400 flex items-center gap-1">
+            <Check className="h-3 w-3" /> COMMUNICATION
+          </span>
+          <span className="px-2.5 py-1 rounded-md bg-fintech-bg border border-fintech-border text-[11px] font-mono text-success-400 flex items-center gap-1">
+            <Check className="h-3 w-3" /> LOW RISK
+          </span>
+          <button
+            onClick={() => setPermissionInfoModalOpen(true)}
+            className="px-2.5 py-1 rounded-md bg-fintech-bg hover:bg-fintech-secondary border border-warning-500/40 text-[11px] font-mono text-warning-400 flex items-center gap-1 transition-colors"
+            title="Click to view financial security rule"
+          >
+            <Lock className="h-3 w-3" /> FINANCIAL
+          </button>
+        </div>
+      </div>
+
       {/* Action Cards List */}
       {displayList.length === 0 ? (
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-12 text-center space-y-3">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800 text-slate-400">
-            <CheckCircle2 className="h-6 w-6 text-emerald-400" />
+        <div className="fintech-card p-12 text-center space-y-3">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-success-500/10 border border-success-500/20 text-success-400">
+            <CheckCircle2 className="h-6 w-6 text-success-400" />
           </div>
-          <h3 className="text-base font-bold text-white">Action Center Queue Clear</h3>
-          <p className="text-xs text-slate-400 max-w-md mx-auto">
+          <h3 className="text-sm font-bold text-slate-100">Action Center Queue Clear</h3>
+          <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
             {activeTab === 'PENDING'
-              ? 'All AI-proposed recovery actions have been reviewed. New actions will appear here when generated by the Recovery Agent.'
+              ? 'All AI-proposed recovery actions have been reviewed and resolved. When the Recovery Agent identifies new opportunities, staged actions will appear here for authorization.'
               : 'No historical executed actions found.'}
           </p>
         </div>
@@ -162,64 +201,71 @@ export const ActionCenterPage: React.FC = () => {
             return (
               <div
                 key={action.id}
-                className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-xl backdrop-blur space-y-4 hover:border-slate-700 transition-all"
+                className="fintech-card p-6 space-y-4 hover:border-brand-500/30 transition-all"
               >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30 font-bold">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-fintech-border">
+                  <div className="flex items-center gap-3.5">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-ai-500/10 text-ai-400 border border-ai-500/20 font-bold shrink-0">
                       <Bot className="h-5 w-5" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-base font-bold text-white">
-                          Action: {action.actionType.replace(/_/g, ' ')}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-warning-400 bg-warning-500/10 px-2 py-0.5 rounded border border-warning-500/20">
+                          ACTION REQUIRES APPROVAL
+                        </span>
+                        <h3 className="text-sm font-bold text-slate-100">
+                          {action.actionType.replace(/_/g, ' ')}
                         </h3>
                         <PermissionTierBadge tier={action.permissionTier} />
                       </div>
-                      <p className="text-xs text-slate-400">
-                        Target Account: <strong className="text-slate-200">{action.customer?.name || 'Customer'}</strong>
-                        {action.invoice && ` • Invoice #${action.invoice.invoiceNumber} ($${action.invoice.amount?.toLocaleString()})`}
+                      <p className="text-xs text-slate-300 mt-1">
+                        <strong className="text-slate-100 font-semibold">{action.customer?.name || 'Customer'}</strong>
+                        {action.invoice && (
+                          <span className="text-slate-400">
+                            {' '}• Invoice #{action.invoice.invoiceNumber} (<span className="font-mono text-slate-200">${action.invoice.amount?.toLocaleString()}</span>)
+                          </span>
+                        )}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                      className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
                         action.status === 'APPROVED'
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                          ? 'bg-success-500/10 text-success-400 border-success-500/30'
                           : action.status === 'REJECTED'
-                          ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                          ? 'bg-risk-500/10 text-risk-400 border-risk-500/30'
                           : action.status === 'CANCELLED'
                           ? 'bg-slate-800 text-slate-400 border-slate-700'
-                          : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                          : 'bg-warning-500/10 text-warning-400 border-warning-500/30'
                       }`}
                     >
-                      {action.status}
+                      ● {action.status === 'PENDING_APPROVAL' ? 'Pending Approval' : action.status}
                     </span>
                   </div>
                 </div>
 
                 {/* Details Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                  <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-1.5">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">AI Reasoning & Behavioral Context</p>
+                  <div className="p-4 rounded-xl bg-fintech-bg border border-fintech-border space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-brand-400">Reason</p>
                     <p className="text-slate-200 leading-relaxed">{action.reasoning}</p>
                     {action.riskAnalysis && (
-                      <p className="text-slate-400 text-[11px] pt-1 border-t border-slate-800">
-                        Risk Analysis: {action.riskAnalysis}
+                      <p className="text-slate-400 text-[11px] pt-2 border-t border-fintech-border">
+                        <strong className="text-slate-300">Risk Assessment:</strong> {action.riskAnalysis}
                       </p>
                     )}
                   </div>
 
-                  <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Staged Payload Preview</p>
+                  <div className="p-4 rounded-xl bg-fintech-bg border border-fintech-border space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-ai-400">Staged PayPal Payload Preview</p>
                     {payload.messageContent ? (
-                      <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 font-mono text-[11px] text-slate-300 max-h-24 overflow-y-auto whitespace-pre-wrap">
+                      <div className="p-3 rounded-lg bg-fintech-surface border border-fintech-border font-mono text-[11px] text-slate-300 max-h-28 overflow-y-auto whitespace-pre-wrap leading-relaxed">
                         {payload.messageContent}
                       </div>
                     ) : (
-                      <pre className="p-2 rounded bg-slate-900 text-[10px] text-slate-400 overflow-x-auto">
+                      <pre className="p-2.5 rounded-lg bg-fintech-surface border border-fintech-border text-[10px] text-slate-300 overflow-x-auto font-mono">
                         {JSON.stringify(payload, null, 2)}
                       </pre>
                     )}
@@ -232,35 +278,35 @@ export const ActionCenterPage: React.FC = () => {
                     <button
                       onClick={() => handleOpenEdit(action)}
                       disabled={processingId === action.id}
-                      className="flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 px-4 py-2 text-xs font-bold text-slate-200 transition-colors"
+                      className="fintech-btn-secondary px-3.5 py-1.5 text-xs font-semibold flex items-center gap-1.5"
                     >
-                      <FileEdit className="h-4 w-4" />
+                      <FileEdit className="h-3.5 w-3.5" />
                       <span>Edit Content</span>
                     </button>
 
                     <button
                       onClick={() => handleReject(action)}
                       disabled={processingId === action.id}
-                      className="flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-950/40 hover:bg-rose-900/50 px-4 py-2 text-xs font-bold text-rose-300 transition-colors"
+                      className="px-3.5 py-1.5 rounded-lg border border-risk-500/30 bg-risk-500/10 hover:bg-risk-500/20 text-xs font-semibold text-risk-400 transition-colors flex items-center gap-1.5"
                     >
-                      <XCircle className="h-4 w-4" />
+                      <XCircle className="h-3.5 w-3.5" />
                       <span>Reject</span>
                     </button>
 
                     <button
                       onClick={() => handleApprove(action)}
                       disabled={processingId === action.id}
-                      className="flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-5 py-2 text-xs font-bold text-white shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
+                      className="fintech-btn-primary px-4 py-1.5 text-xs font-semibold flex items-center gap-1.5"
                     >
                       {processingId === action.id ? (
                         <>
-                          <RefreshCw className="h-4 w-4 animate-spin" />
-                          <span>Authorizing...</span>
+                          <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                          <span>Executing on PayPal Sandbox...</span>
                         </>
                       ) : (
                         <>
-                          <CheckCircle2 className="h-4 w-4" />
-                          <span>Approve & Authorize</span>
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          <span>Approve Action</span>
                         </>
                       )}
                     </button>
@@ -288,14 +334,14 @@ export const ActionCenterPage: React.FC = () => {
               rows={8}
               value={editedMessage}
               onChange={(e) => setEditedMessage(e.target.value)}
-              className="w-full rounded-xl border border-slate-700 bg-slate-950 p-3 text-xs text-white focus:border-blue-500 focus:outline-none font-mono leading-relaxed"
+              className="w-full rounded-xl border border-fintech-border bg-fintech-bg p-3.5 text-xs text-slate-100 focus:border-brand-500 focus:outline-none font-mono leading-relaxed"
             />
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
             <button
               onClick={() => setEditModalOpen(false)}
-              className="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white"
+              className="px-3.5 py-2 rounded-lg text-xs text-slate-400 hover:text-white"
             >
               Cancel
             </button>
@@ -305,10 +351,43 @@ export const ActionCenterPage: React.FC = () => {
                 payload.messageContent = editedMessage;
                 handleApprove(selectedAction, payload);
               }}
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-2 text-xs font-bold text-white transition-colors"
+              className="fintech-btn-primary px-4 py-2 text-xs font-semibold flex items-center gap-1.5"
             >
-              <CheckCircle2 className="h-4 w-4" />
+              <CheckCircle2 className="h-3.5 w-3.5" />
               <span>Save & Authorize Execution</span>
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Permission Engine Financial Lock Modal */}
+      <Modal
+        isOpen={permissionInfoModalOpen}
+        onClose={() => setPermissionInfoModalOpen(false)}
+        title="Permission Engine: Financial Security Tier"
+        subtitle="Explicit merchant authorization safeguard"
+      >
+        <div className="space-y-4">
+          <div className="p-4 rounded-xl bg-warning-500/10 border border-warning-500/20 text-xs text-warning-300 flex items-start gap-3">
+            <Lock className="h-5 w-5 text-warning-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold text-slate-100">Financial actions require explicit merchant authorization.</p>
+              <p className="mt-1 text-slate-300">
+                To guarantee financial safety and prevent unintended invoice or payment operations, autonomous AI agents cannot execute monetary refunds, fee waivers, or invoice adjustments without a human administrator reviewing and authorizing the staged payload.
+              </p>
+            </div>
+          </div>
+
+          <p className="text-xs text-slate-400 leading-relaxed">
+            <strong>Core Principle:</strong> AI assists with intelligent diagnostics and proposal formulation. Humans authorize critical financial decisions.
+          </p>
+
+          <div className="flex justify-end pt-2">
+            <button
+              onClick={() => setPermissionInfoModalOpen(false)}
+              className="fintech-btn-secondary px-4 py-2 text-xs font-semibold"
+            >
+              Understood
             </button>
           </div>
         </div>
