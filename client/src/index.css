@@ -1,0 +1,43 @@
+@import 'ag-grid-community/styles/ag-grid.css';
+@import 'ag-grid-community/styles/ag-theme-alpine.css';
+@import 'ag-grid-community/styles/ag-theme-quartz.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-100 font-sans antialiased;
+  }
+}
+
+/* Custom AG Grid Dark Overrides */
+.ag-theme-quartz-dark {
+  --ag-background-color: #0f172a;
+  --ag-header-background-color: #1e293b;
+  --ag-odd-row-background-color: #0f172a;
+  --ag-row-hover-color: #1e293b;
+  --ag-border-color: #334155;
+  --ag-foreground-color: #f1f5f9;
+  --ag-header-foreground-color: #94a3b8;
+  --ag-selected-row-background-color: rgba(37, 99, 235, 0.2);
+  --ag-font-family: 'Inter', sans-serif;
+  --ag-font-size: 13px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}

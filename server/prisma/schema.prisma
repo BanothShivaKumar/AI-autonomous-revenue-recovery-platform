@@ -1,0 +1,358 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("MERCHANT_ADMIN")
+  merchantId   String?
+  merchant     Merchant? @relation(fields: [merchantId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Merchant {
+  id              String           @id @default(uuid())
+  name            String
+  businessType    String           @default("SAAS_SERVICES")
+  currency        String           @default("USD")
+  logoUrl         String?
+  users           User[]
+  paypalAccounts  PayPalAccount[]
+  customers       Customer[]
+  transactions    Transaction[]
+  payments        Payment[]
+  invoices        Invoice[]
+  subscriptions   Subscription[]
+  refunds         Refund[]
+  aiInsights      AiInsight[]
+  aiRecommendations AiRecommendation[]
+  reminders       Reminder[]
+  reminderPolicies ReminderPolicy[]
+  actionRequests  ActionRequest[]
+  auditLogs       AuditLog[]
+  products        Product[]
+  orders          Order[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model PayPalAccount {
+  id            String   @id @default(uuid())
+  merchantId    String
+  merchant      Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  payerId       String?
+  email         String
+  accountStatus String   @default("ACTIVE")
+  sandboxMode   Boolean  @default(true)
+  clientId      String?
+  clientSecret  String?
+  webhookId     String?
+  lastSyncAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Customer {
+  id               String           @id @default(uuid())
+  merchantId       String
+  merchant         Merchant         @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  paypalCustomerId String?
+  name             String
+  email            String
+  company          String?
+  phone            String?
+  avatarUrl        String?
+  status           String           @default("ACTIVE") // ACTIVE, AT_RISK, CHURNED, OVERDUE
+  segment          String           @default("RELIABLE") // RELIABLE, REMINDER_RESPONSIVE, AT_RISK, HIGH_VALUE, OVERDUE, DECLINING, NEW, INACTIVE
+  riskScore        Float            @default(0.0) // 0 - 100 calculated deterministically
+  firstSeenAt      DateTime         @default(now())
+  lastSeenAt       DateTime         @default(now())
+  notes            String?
+  transactions     Transaction[]
+  payments         Payment[]
+  invoices         Invoice[]
+  subscriptions    Subscription[]
+  reminders        Reminder[]
+  actionRequests   ActionRequest[]
+  aiInsights       AiInsight[]
+  aiRecommendations AiRecommendation[]
+  orders           Order[]
+  refunds          Refund[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model Transaction {
+  id                  String   @id @default(uuid())
+  merchantId          String
+  merchant            Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customerId          String?
+  customer            Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  paypalTransactionId String   @unique
+  orderId             String?
+  invoiceId           String?
+  invoice             Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  amount              Float
+  fee                 Float    @default(0.0)
+  netAmount           Float    @default(0.0)
+  currency            String   @default("USD")
+  status              String   // COMPLETED, PENDING, FAILED, REFUNDED, DENIED
+  paymentMethod       String   @default("PAYPAL_BALANCE") // PAYPAL_BALANCE, CREDIT_CARD, BANK_TRANSFER
+  failureReason       String?
+  riskIndicator       String?  // LOW, MEDIUM, HIGH
+  aiInsight           String?
+  rawData             String?  // JSON string
+  transactionDate     DateTime @default(now())
+  refunds             Refund[]
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Payment {
+  id              String   @id @default(uuid())
+  merchantId      String
+  merchant        Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customerId      String?
+  customer        Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  invoiceId       String?
+  invoice         Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  paypalCaptureId String?  @unique
+  amount          Float
+  currency        String   @default("USD")
+  status          String   @default("COMPLETED") // COMPLETED, PENDING, FAILED, REFUNDED
+  paymentMethod   String   @default("PAYPAL")
+  paymentDate     DateTime @default(now())
+  createdAt       DateTime @default(now())
+}
+
+model Invoice {
+  id              String           @id @default(uuid())
+  merchantId      String
+  merchant        Merchant         @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customerId      String
+  customer        Customer         @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  invoiceNumber   String           @unique
+  paypalInvoiceId String?          @unique
+  amount          Float
+  currency        String           @default("USD")
+  status          String           @default("UNPAID") // PAID, UNPAID, OVERDUE, CANCELLED, DRAFT
+  issueDate       DateTime         @default(now())
+  dueDate         DateTime
+  paidDate        DateTime?
+  itemsJson       String?          // JSON representation of line items
+  paymentLink     String?
+  notes           String?
+  transactions    Transaction[]
+  payments        Payment[]
+  reminders       Reminder[]
+  actionRequests  ActionRequest[]
+  aiRecommendations AiRecommendation[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model Subscription {
+  id                   String   @id @default(uuid())
+  merchantId           String
+  merchant             Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customerId           String
+  customer             Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  paypalSubscriptionId String   @unique
+  planName             String
+  status               String   @default("ACTIVE") // ACTIVE, SUSPENDED, CANCELLED, PAST_DUE
+  amount               Float
+  currency             String   @default("USD")
+  billingCycle         String   @default("MONTHLY") // MONTHLY, YEARLY, WEEKLY
+  nextBillingDate      DateTime
+  failedAttempts       Int      @default(0)
+  riskIndicator        String   @default("LOW") // LOW, MEDIUM, HIGH
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model Refund {
+  id             String      @id @default(uuid())
+  merchantId     String
+  merchant       Merchant    @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  transactionId  String
+  transaction    Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  customerId     String?
+  customer       Customer?   @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  paypalRefundId String      @unique
+  amount         Float
+  currency       String      @default("USD")
+  status         String      @default("COMPLETED")
+  reason         String?
+  refundDate     DateTime    @default(now())
+  createdAt      DateTime    @default(now())
+}
+
+model WebhookEvent {
+  id           String    @id @default(uuid())
+  paypalEventId String   @unique
+  eventType    String
+  summary      String?
+  resourceType String?
+  payloadJson  String    // Stored raw JSON
+  status       String    @default("PENDING") // PENDING, PROCESSED, FAILED, IGNORED
+  errorLog     String?
+  receivedAt   DateTime  @default(now())
+  processedAt  DateTime?
+}
+
+model AiInsight {
+  id                  String   @id @default(uuid())
+  merchantId          String
+  merchant            Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customerId          String?
+  customer            Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  title               String
+  summary             String
+  category            String   // REVENUE_DECLINE, RECOVERY_OPPORTUNITY, RISK_ALERT, BEHAVIOR_SHIFT
+  confidenceScore     Float    @default(0.95)
+  metricsSnapshotJson String?  // Deterministic metrics backup
+  isRead              Boolean  @default(false)
+  isDismissed         Boolean  @default(false)
+  createdAt           DateTime @default(now())
+}
+
+model AiRecommendation {
+  id                      String   @id @default(uuid())
+  merchantId              String
+  merchant                Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customerId              String?
+  customer                Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  invoiceId               String?
+  invoice                 Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  title                   String
+  recommendedAction       String   // SEND_REMINDER, PAYMENT_REQUEST, MERCHANT_REVIEW, ESCALATE, CANCEL_REMINDER
+  reasoningJson           String   // Deterministic bullet points
+  confidenceScore         Float    @default(0.9)
+  priority                String   @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  status                  String   @default("PENDING") // PENDING, APPROVED, REJECTED, EXECUTED
+  estimatedRecoveryAmount Float    @default(0.0)
+  createdAt               DateTime @default(now())
+}
+
+model ReminderPolicy {
+  id                 String   @id @default(uuid())
+  merchantId         String
+  merchant           Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  name               String   @default("Standard SaaS Policy")
+  firstReminderDays  Int      @default(1)
+  secondReminderDays Int      @default(3)
+  finalReminderDays  Int      @default(7)
+  maxReminders       Int      @default(3)
+  minIntervalDays    Int      @default(2)
+  stopOnPayment      Boolean  @default(true)
+  requireApproval    Boolean  @default(true)
+  friendlyTemplate   String?
+  firmTemplate       String?
+  escalationTemplate String?
+  isDefault          Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Reminder {
+  id                 String          @id @default(uuid())
+  merchantId         String
+  merchant           Merchant        @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customerId         String
+  customer           Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  invoiceId          String
+  invoice            Invoice         @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  reminderNumber     Int             @default(1)
+  channel            String          @default("EMAIL") // EMAIL, SMS, PAYPAL_INVOICE_REMINDER
+  status             String          @default("SCHEDULED") // SCHEDULED, SENT, PAID, CANCELLED, FAILED, NEEDS_REVIEW
+  scheduledFor       DateTime
+  sentAt             DateTime?
+  messageContent     String
+  triggerSource      String          @default("AUTO_AGENT") // AUTO_AGENT, MANUAL_APPROVAL, ESCALATION
+  responseTimeMinutes Int?
+  events             ReminderEvent[]
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+}
+
+model ReminderEvent {
+  id           String   @id @default(uuid())
+  reminderId   String
+  reminder     Reminder @relation(fields: [reminderId], references: [id], onDelete: Cascade)
+  eventType    String   // SCHEDULED, SENT, OPENED, CLICKED, PAID, CANCELLED, BOUNCED
+  metadataJson String?
+  timestamp    DateTime @default(now())
+}
+
+model ActionRequest {
+  id                 String    @id @default(uuid())
+  merchantId         String
+  merchant           Merchant  @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customerId         String?
+  customer           Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  invoiceId          String?
+  invoice            Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  actionType         String    // SEND_REMINDER, CREATE_INVOICE, CAPTURE_PAYMENT, REFUND, MERCHANT_REVIEW, ESCALATE
+  permissionTier     String    // READ, COMMUNICATION, LOW_RISK, FINANCIAL
+  status             String    @default("PENDING_APPROVAL") // PENDING_APPROVAL, APPROVED, REJECTED, EXECUTED, FAILED
+  proposedPayloadJson String
+  reasoning          String
+  riskAnalysis       String?
+  requestedBy        String    @default("AI_RECOVERY_AGENT")
+  approvedBy         String?
+  approvedAt         DateTime?
+  executedAt         DateTime?
+  executionResultJson String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  merchantId  String
+  merchant    Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  entityType  String   // TRANSACTION, INVOICE, CUSTOMER, REMINDER, ACTION_REQUEST, WEBHOOK, PERMISSION
+  entityId    String
+  action      String   // CREATED, UPDATED, APPROVED, REJECTED, EXECUTED, BLOCKED, CANCELLED, SYNCED
+  performedBy String   // USER, AI_AGENT, PAYPAL_WEBHOOK, PERMISSION_ENGINE
+  userRole    String?
+  detailsJson String?
+  ipAddress   String?
+  timestamp   DateTime @default(now())
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  merchantId  String
+  merchant    Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  price       Float
+  currency    String   @default("USD")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Order {
+  id          String   @id @default(uuid())
+  merchantId  String
+  merchant    Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  orderNumber String   @unique
+  paypalOrderId String? @unique
+  totalAmount Float
+  status      String   @default("COMPLETED")
+  itemsJson   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
