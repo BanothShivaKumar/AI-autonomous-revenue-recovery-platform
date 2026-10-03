@@ -1,152 +1,821 @@
-# PayPilot
-### AI Revenue Recovery & Customer Intelligence Agent for PayPal
-*Built for the **PayPal AI Hackathon 2026***
+# 🚀 PayPilot
+## AI Revenue Recovery & Customer Intelligence Agent for PayPal
+
+> **Built for the PayPal AI Hackathon 2026**
+
+**PayPilot** is an AI-powered Revenue Operations platform that transforms raw PayPal transaction data into actionable customer intelligence, revenue-risk insights, and controlled recovery workflows.
+
+Instead of simply telling businesses **what happened**, PayPilot helps answer:
+
+- 💰 **Where is revenue at risk?**
+- 🔍 **Why is it at risk?**
+- 👤 **Which customers require attention?**
+- 🤖 **What recovery action should be taken?**
+- 🔐 **What is the AI actually allowed to do?**
+- ⚡ **What happens after the customer pays?**
+
+PayPilot closes the loop from **transaction → intelligence → action → payment → automated feedback**.
 
 ---
 
-## 1. Executive Summary
-
-**PayPilot** is an intelligent revenue operations platform that transforms passive PayPal transaction data into predictive customer intelligence, detects at-risk revenue, prepares personalized recovery actions, and executes authorized PayPal workflows through a strict Permission Engine.
-
-Traditional payment dashboards only show historical totals. PayPilot closes the loop:
+## 🧠 The PayPilot Loop
 
 ```text
-PAYPAL TRANSACTION DATA
-          ↓
-CUSTOMER INTELLIGENCE ENGINE (Behavioral baseline vs 30D activity)
-          ↓
-REVENUE INTELLIGENCE (Risk detection & root cause calculations)
-          ↓
-AI REVENUE RECOVERY AGENT (Strategy formulation)
-          ↓
-PERMISSION ENGINE (Strict 4-Tier Security: READ, COMMUNICATION, LOW_RISK, FINANCIAL)
-          ↓
-ACTION CENTER (Human-in-the-loop review & approval)
-          ↓
-PAYPAL WORKFLOW (Invoice reminder / Payment recovery link)
-          ↓
-CUSTOMER ACTION & SETTLEMENT
-          ↓
-PAYPAL WEBHOOK (Signature-verified event)
-          ↓
-FEEDBACK LOOP (Auto-cancel scheduled reminders & update metrics)
+┌──────────────────────────────┐
+│      PAYPAL TRANSACTIONS     │
+└──────────────┬───────────────┘
+               ↓
+┌──────────────────────────────┐
+│   CUSTOMER INTELLIGENCE      │
+│  Historical vs Recent Activity│
+└──────────────┬───────────────┘
+               ↓
+┌──────────────────────────────┐
+│    REVENUE INTELLIGENCE      │
+│ Risk Detection + Root Cause  │
+└──────────────┬───────────────┘
+               ↓
+┌──────────────────────────────┐
+│   AI REVENUE RECOVERY AGENT  │
+│ Strategy + Action Generation │
+└──────────────┬───────────────┘
+               ↓
+┌──────────────────────────────┐
+│     PERMISSION ENGINE        │
+│ READ → COMMUNICATION →       │
+│ LOW_RISK → FINANCIAL         │
+└──────────────┬───────────────┘
+               ↓
+┌──────────────────────────────┐
+│       ACTION CENTER          │
+│ Human Review & Authorization │
+└──────────────┬───────────────┘
+               ↓
+┌──────────────────────────────┐
+│      PAYPAL WORKFLOW         │
+│ Invoice / Reminder / Payment │
+└──────────────┬───────────────┘
+               ↓
+┌──────────────────────────────┐
+│       CUSTOMER PAYS          │
+└──────────────┬───────────────┘
+               ↓
+┌──────────────────────────────┐
+│   PAYPAL WEBHOOK EVENT       │
+│ Signature-Verified Event     │
+└──────────────┬───────────────┘
+               ↓
+┌──────────────────────────────┐
+│      FEEDBACK LOOP           │
+│ Update Risk + Cancel Dunning │
+│ + Update Revenue Metrics     │
+└──────────────────────────────┘
 ```
 
 ---
 
-## 2. Core Innovations
+# 🎯 Why PayPilot?
 
-1. **Deterministic Calculations, Generative Explanations**: Financial metrics, aging brackets, and risk scores are computed deterministically in backend code. The AI explains verified numbers rather than hallucinating financial amounts.
-2. **"What Changed?" Customer Behavior Engine**: Automatically compares a customer's historical payment discipline (e.g. 90-day baseline) against recent 30-day activity, pinpointing payment delay shifts (+4.8 days) and failed transactions.
-3. **4-Tier Permission Gatekeeper**: Strict boundaries ensure AI models can analyze data (`READ`) and propose communications (`COMMUNICATION`), but **can never autonomously execute financial movements (`FINANCIAL`)** without explicit human authorization.
-4. **PayPal Event-Driven Feedback Loop**: When a customer settles an invoice via PayPal, webhook events instantly mark the invoice paid, auto-cancel scheduled reminders, update risk profiles, and write to the immutable audit log.
+Traditional payment dashboards are primarily **descriptive**.
+
+They show:
+
+> "You have $7,820 outstanding."
+
+PayPilot goes further:
+
+> **"$4,210 of your outstanding revenue is currently at risk because payment failures and increased payment delays are concentrated among a specific group of customers."**
+
+Then it turns that insight into a controlled action:
+
+> **"Prepare a personalized recovery reminder for the affected customers."**
+
+And after the customer pays:
+
+> **"Payment confirmed → invoice settled → future reminders cancelled → risk profile updated."**
+
+This creates an intelligent, event-driven revenue recovery loop.
 
 ---
 
-## 3. Technology Stack
+# ⭐ Core Innovations
 
-- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, AG Grid Community, Recharts, Lucide Icons
-- **Backend API**: Node.js, Express, TypeScript, Prisma ORM
-- **Database**: SQLite (Zero-config out of the box) / PostgreSQL support
-- **PayPal SDK / REST**: PayPal Developer Platform (v1/v2 REST APIs, Orders, Invoicing, Subscriptions, Payments, Webhooks)
-- **Testing**: Vitest, Supertest (100% test pass rate across critical safety paths)
+## 1. Deterministic Financial Intelligence
+
+Financial calculations are **never delegated to the LLM**.
+
+Metrics such as:
+
+- Outstanding balance
+- Revenue at risk
+- Payment delays
+- Failed payment counts
+- Invoice aging
+- Recovery amounts
+- Risk scores
+
+are calculated deterministically by backend services.
+
+The AI receives verified results and focuses on **reasoning, explanation, prioritization, and action formulation**.
+
+```text
+Raw Data
+   ↓
+Deterministic Backend Calculations
+   ↓
+Verified Financial Metrics
+   ↓
+AI Explanation & Strategy
+```
+
+This significantly reduces the risk of AI-generated financial hallucinations.
 
 ---
 
-## 4. Quick Start & Setup
+# 2. 🔎 "What Changed?" Customer Intelligence
 
-### Prerequisites
-- Node.js v18+ (tested on Node v22)
-- npm v9+
+PayPilot doesn't only analyze the current state.
 
-### 1. Clone & Install Dependencies
+It compares a customer's historical behavior against their recent activity.
+
+### Example
+
+```text
+Historical Payment Speed
+        ↓
+      1.4 days
+        ↓
+Recent Payment Delay
+        ↓
+      6.2 days
+        ↓
+Change: +4.8 days
+```
+
+The system can also identify:
+
+- New payment failures
+- Increasing invoice aging
+- Declining payment discipline
+- Reduced transaction activity
+- Repeated overdue behavior
+
+This allows businesses to identify **behavioral deterioration before it becomes a larger revenue problem**.
+
+---
+
+# 3. 🔐 4-Tier AI Permission Engine
+
+AI agents should not automatically control financial operations.
+
+PayPilot therefore introduces a strict permission model:
+
+| Permission Tier | Example | AI Access |
+|---|---|---|
+| `READ` | View customer/payment data | ✅ |
+| `COMMUNICATION` | Prepare customer messages | ✅ |
+| `LOW_RISK` | Create non-financial operational actions | Controlled |
+| `FINANCIAL` | Execute financial movement | 🚫 Human authorization |
+
+The critical principle is:
+
+> **AI can recommend financial actions, but it cannot independently execute financial movement.**
+
+Financial actions are routed through the **Action Center**, where a human must explicitly authorize the operation.
+
+```text
+AI Recommendation
+       ↓
+Permission Engine
+       ↓
+FINANCIAL ACTION?
+       ↓
+   HUMAN REVIEW
+       ↓
+Approve & Authorize
+       ↓
+PayPal Workflow
+```
+
+---
+
+# 4. ⚡ Event-Driven PayPal Feedback Loop
+
+PayPilot is not a one-way automation system.
+
+When a customer completes a payment through PayPal, the platform can process the corresponding webhook event.
+
+```text
+Customer Payment
+       ↓
+PayPal Webhook
+       ↓
+Signature Verification
+       ↓
+Invoice → PAID
+       ↓
+Cancel Future Reminders
+       ↓
+Update Customer Risk
+       ↓
+Update Revenue Metrics
+       ↓
+Audit Log
+```
+
+This allows the system to continuously learn from the latest payment state.
+
+---
+
+# 🏗️ System Architecture
+
+```text
+                    ┌──────────────────┐
+                    │   PayPal APIs    │
+                    └────────┬─────────┘
+                             │
+                             ↓
+┌────────────────────────────────────────────────┐
+│                  PayPilot                      │
+│                                                │
+│  ┌──────────────┐       ┌──────────────────┐  │
+│  │ React Frontend│ ───→ │ Express API      │  │
+│  └──────────────┘       └────────┬─────────┘  │
+│                                  │             │
+│              ┌───────────────────┼──────────┐  │
+│              ↓                   ↓          ↓  │
+│      ┌──────────────┐   ┌──────────────┐  │  │
+│      │ Customer     │   │ Revenue      │  │  │
+│      │ Intelligence │   │ Intelligence │  │  │
+│      └──────────────┘   └──────────────┘  │  │
+│              │                   │          │  │
+│              └─────────┬─────────┘          │  │
+│                        ↓                    │  │
+│               ┌─────────────────┐          │  │
+│               │ AI Agent        │          │  │
+│               │ Tool Calling    │          │  │
+│               └────────┬────────┘          │  │
+│                        ↓                    │  │
+│               ┌─────────────────┐          │  │
+│               │ Permission      │          │  │
+│               │ Engine          │          │  │
+│               └────────┬────────┘          │  │
+│                        ↓                    │  │
+│               ┌─────────────────┐          │  │
+│               │ Action Center   │          │  │
+│               └────────┬────────┘          │  │
+│                        ↓                    │  │
+│               ┌─────────────────┐          │  │
+│               │ Prisma ORM      │          │  │
+│               └────────┬────────┘          │  │
+│                        ↓                    │  │
+│               ┌─────────────────┐          │  │
+│               │ SQLite /         │          │  │
+│               │ PostgreSQL       │          │  │
+│               └─────────────────┘          │  │
+└────────────────────────────────────────────────┘
+```
+
+---
+
+# 🛠️ Technology Stack
+
+### Frontend
+
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- AG Grid Community
+- Recharts
+- Lucide Icons
+
+### Backend
+
+- Node.js
+- Express.js
+- TypeScript
+- Prisma ORM
+- REST APIs
+- JWT Authentication
+
+### Database
+
+- SQLite — zero-config development
+- PostgreSQL — production-ready deployment
+
+### PayPal Integration
+
+- PayPal Developer Platform
+- PayPal REST APIs
+- Orders
+- Invoicing
+- Subscriptions
+- Payments
+- Webhooks
+
+### Testing
+
+- Vitest
+- Supertest
+- Integration testing
+- Permission-engine safety tests
+- Webhook verification tests
+
+---
+
+# 🚀 Quick Start
+
+## Prerequisites
+
+Make sure you have:
+
+- Node.js `18+`
+- npm `9+`
+- PayPal Developer Sandbox credentials
+
+The application has been tested with Node.js `22`.
+
+---
+
+## 1. Clone the Repository
+
 ```bash
 git clone <repo-url>
 cd Paypal
 npm install
 ```
 
-### 2. Environment Configuration
-Copy `.env.example` to `.env`:
+---
+
+## 2. Configure Environment Variables
+
+Copy the example environment file:
+
 ```bash
 cp .env.example .env
 ```
 
-Default configuration in `.env`:
+Configure your environment:
+
 ```env
 DATABASE_URL="file:./dev.db"
+
 PORT=5000
 NODE_ENV=development
-JWT_SECRET="paypilot_super_secure_jwt_secret_change_in_production_2026"
+
+JWT_SECRET="change_this_secret_in_production"
+
 PAYPAL_CLIENT_ID="<YOUR_SANDBOX_CLIENT_ID>"
 PAYPAL_CLIENT_SECRET="<YOUR_SANDBOX_CLIENT_SECRET>"
+
 PAYPAL_BASE_URL="https://api-m.sandbox.paypal.com"
+
 PAYPAL_WEBHOOK_ID="<YOUR_WEBHOOK_ID>"
 ```
 
-### 3. Initialize Database & Seed Demo Data
-```bash
-# Push Prisma schema to SQLite
-npm run prisma:push --workspace=server
+> ⚠️ Never commit real PayPal credentials, JWT secrets, or production environment variables to GitHub.
 
-# Seed Demo Business "Nova Digital Studio" (30+ customers, 100+ transactions)
+---
+
+# 🗄️ 3. Initialize the Database
+
+Push the Prisma schema:
+
+```bash
+npm run prisma:push --workspace=server
+```
+
+Seed the demo environment:
+
+```bash
 npm run seed
 ```
 
-### 4. Run the Full-Stack Application
+The demo environment creates:
+
+**Nova Digital Studio**
+
+with:
+
+- 30+ customers
+- 100+ transactions
+- invoices
+- payment history
+- behavioral metrics
+- revenue-risk scenarios
+
+---
+
+# ▶️ 4. Start PayPilot
+
 ```bash
 npm run dev
 ```
 
-- **Frontend Application**: `http://localhost:5173`
-- **Backend API Server**: `http://localhost:5000`
+The application will be available at:
+
+```text
+Frontend:
+http://localhost:5173
+
+Backend:
+http://localhost:5000
+```
 
 ---
 
-## 5. 3-Minute Hackathon Demo Flow
+# 🎬 3-Minute Hackathon Demo
 
-Use the built-in **Interactive 3-Min Hackathon Demo Stepper** in the top navigation bar:
+PayPilot includes an **Interactive 3-Minute Hackathon Demo Stepper** designed to demonstrate the complete intelligence-to-recovery loop.
 
-1. **Executive Dashboard (`/dashboard`)**: Inspect processed volume ($48,240), outstanding exposure ($7,820), and revenue at risk ($4,210) for *Nova Digital Studio*.
-2. **AI Revenue Intelligence (`/ai-agent`)**: Ask *"Why is my revenue at risk?"* — The AI queries live database tools and attributes risk to failed payments and overdue accounts.
-3. **Customer Intelligence (`/customer-intelligence`)**: Explore deterministic segments (Reliable, Reminder-Responsive, At-Risk, High-Value, Overdue, Declining).
-4. **Customer 360 Profile (`/customers/:id`)**: Open *Alex Technologies* and inspect payment history and delay trajectory.
-5. **"What Changed?" Engine**: Click *"What Changed?"* to observe AI comparing historical 1.4-day payment speed against recent 6.2-day delay and 2 payment failures.
-6. **Formulate Recovery Actions**: Ask AI *"Prepare recovery actions for customers overdue by more than 3 days"*.
-7. **Action Center (`/action-center`)**: Review the AI-prepared reminder for *Alex Technologies (INV-1024)* and click **Approve & Authorize**.
-8. **PayPal Webhook Ingestion (`/demo-simulator`)**: Click **Simulate $450 Payment** (or dispatch real PayPal webhook).
-9. **Automated Feedback Loop**: Observe invoice `#INV-1024` marked **PAID** and future scheduled reminders **AUTOMATICALLY CANCELLED**.
-10. **Executive Loop Completed**: Return to dashboard to see outstanding balance drop, recovered revenue rise, and risk scores improve.
+## Step 1 — Executive Dashboard
+
+Navigate to:
+
+```text
+/dashboard
+```
+
+Show:
+
+- Processed Volume: **$48,240**
+- Outstanding Exposure: **$7,820**
+- Revenue at Risk: **$4,210**
+
+Explain that the dashboard is not simply reporting historical payments — it is highlighting **potentially recoverable revenue**.
 
 ---
 
-## 6. Running Automated Tests
+## Step 2 — Ask the AI
+
+Navigate to:
+
+```text
+/ai-agent
+```
+
+Ask:
+
+> **"Why is my revenue at risk?"**
+
+The AI uses backend tools to retrieve verified information and explain the major contributors to revenue risk.
+
+---
+
+## Step 3 — Customer Intelligence
+
+Navigate to:
+
+```text
+/customer-intelligence
+```
+
+Explore customer segments such as:
+
+- Reliable
+- Reminder-Responsive
+- At-Risk
+- High-Value
+- Overdue
+- Declining
+
+These segments are derived from deterministic backend metrics.
+
+---
+
+## Step 4 — Customer 360
+
+Open:
+
+```text
+/customers/:id
+```
+
+Select:
+
+**Alex Technologies**
+
+Inspect:
+
+- Payment history
+- Invoice history
+- Payment delays
+- Failed transactions
+- Risk trajectory
+
+---
+
+## Step 5 — Demonstrate "What Changed?"
+
+Click:
+
+> **What Changed?**
+
+The system compares historical and recent behavior.
+
+### Example
+
+```text
+Historical payment speed: 1.4 days
+
+Recent payment delay: 6.2 days
+
+Behavior change: +4.8 days
+
+Recent failures: 2
+```
+
+This demonstrates how PayPilot detects **behavioral deterioration**, rather than simply displaying an overdue invoice.
+
+---
+
+## Step 6 — Generate Recovery Actions
+
+Ask the AI:
+
+> **"Prepare recovery actions for customers overdue by more than 3 days."**
+
+The AI analyzes the verified customer data and prepares appropriate recovery actions.
+
+---
+
+## Step 7 — Human Authorization
+
+Navigate to:
+
+```text
+/action-center
+```
+
+Review the generated action for:
+
+**Alex Technologies — INV-1024**
+
+The action is presented for human review.
+
+Click:
+
+> **Approve & Authorize**
+
+This demonstrates the Permission Engine and human-in-the-loop safety model.
+
+---
+
+# 💳 Step 8 — Simulate the Payment
+
+Navigate to:
+
+```text
+/demo-simulator
+```
+
+Click:
+
+> **Simulate $450 Payment**
+
+Alternatively, dispatch a real PayPal sandbox webhook event.
+
+---
+
+# 🔄 Step 9 — Watch the Feedback Loop
+
+PayPilot processes the payment event and automatically:
+
+```text
+INV-1024
+   ↓
+PAID
+   ↓
+Reminder Schedule Cancelled
+   ↓
+Customer Risk Updated
+   ↓
+Revenue Metrics Updated
+   ↓
+Audit Log Updated
+```
+
+Future scheduled reminders for the settled invoice are automatically cancelled.
+
+---
+
+# 📊 Step 10 — Close the Executive Loop
+
+Return to:
+
+```text
+/dashboard
+```
+
+Observe the updated business state:
+
+- Outstanding balance decreases
+- Recovered revenue increases
+- Customer risk improves
+- Invoice status changes
+- Scheduled reminders disappear
+
+The complete loop is now demonstrated:
+
+```text
+DATA
+ ↓
+INTELLIGENCE
+ ↓
+RISK
+ ↓
+AI STRATEGY
+ ↓
+HUMAN AUTHORIZATION
+ ↓
+PAYPAL ACTION
+ ↓
+CUSTOMER PAYMENT
+ ↓
+WEBHOOK
+ ↓
+AUTOMATED FEEDBACK
+```
+
+---
+
+# 🧪 Automated Testing
+
+Run the backend test suite:
 
 ```bash
 npm test --workspace=server
 ```
 
-Runs the 9 critical integration tests:
-- **Permission Engine Safety Block**: AI direct attempts at `FINANCIAL` tier actions are blocked and routed to human approval.
-- **Customer Intelligence Metrics**: Deterministic delay, failure count, and risk score calculation.
-- **Behavior Change Detection**: Accurate delta calculation for the "What Changed?" feature.
-- **Revenue Intelligence**: Verified mathematical calculations.
-- **AI Tool Calling**: Real backend tool execution without hallucinatory output.
-- **Webhook Feedback Loop**: Confirmation of payment settlement and automatic reminder cancellation.
+The test suite covers critical safety and intelligence paths, including:
+
+### 🔐 Permission Engine
+
+Verifies that AI attempts to directly execute `FINANCIAL` actions are blocked and routed through human authorization.
+
+### 📈 Customer Intelligence
+
+Validates:
+
+- Payment delay calculations
+- Failure counts
+- Customer risk scores
+- Behavioral metrics
+
+### 🔎 Behavior Change Detection
+
+Validates the `"What Changed?"` calculation and historical-vs-recent behavioral deltas.
+
+### 💰 Revenue Intelligence
+
+Tests deterministic revenue and exposure calculations.
+
+### 🤖 AI Tool Calling
+
+Ensures AI responses are grounded in actual backend tool execution rather than fabricated financial information.
+
+### 🔔 Webhook Feedback Loop
+
+Validates:
+
+- Payment settlement
+- Invoice status updates
+- Reminder cancellation
+- Risk updates
 
 ---
 
-## 7. Documentation Index
+# 📚 Documentation
 
-- [Architecture & Data Flow](docs/architecture.md)
-- [Security & 4-Tier Permission Model](docs/security.md)
-- [PayPal Integration & Webhooks](docs/paypal-integration.md)
-- [AI Agent & Tool Calling](docs/ai-agent.md)
-- [Customer Intelligence Engine](docs/customer-intelligence.md)
-- [Reminder System & Dunning Policies](docs/reminder-system.md)
+More detailed technical documentation is available in:
+
+| Document | Description |
+|---|---|
+| [`docs/architecture.md`](docs/architecture.md) | System architecture and data flow |
+| [`docs/security.md`](docs/security.md) | 4-tier permission model and security |
+| [`docs/paypal-integration.md`](docs/paypal-integration.md) | PayPal APIs and webhook integration |
+| [`docs/ai-agent.md`](docs/ai-agent.md) | AI agent and tool-calling architecture |
+| [`docs/customer-intelligence.md`](docs/customer-intelligence.md) | Customer intelligence engine |
+| [`docs/reminder-system.md`](docs/reminder-system.md) | Reminder and dunning workflows |
 
 ---
 
-## 8. License
+# 🔒 Security Principles
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+PayPilot is designed around a simple principle:
+
+> **Intelligence can be automated. Financial authority must remain controlled.**
+
+Key safeguards include:
+
+- Deterministic financial calculations
+- AI tool-based data access
+- Permission-based action execution
+- Human approval for financial operations
+- PayPal webhook signature verification
+- Immutable audit logging
+- Environment-based secret management
+- No hardcoded production credentials
+
+---
+
+# 🧩 What Makes PayPilot Different?
+
+```text
+Traditional Dashboard
+        ↓
+      REPORT
+        ↓
+    Human Action
+```
+
+vs.
+
+```text
+                 PAYPILOT
+                    ↓
+              TRANSACTION DATA
+                    ↓
+          CUSTOMER INTELLIGENCE
+                    ↓
+           REVENUE RISK DETECTION
+                    ↓
+             AI EXPLANATION
+                    ↓
+          RECOVERY STRATEGY
+                    ↓
+          PERMISSION ENGINE
+                    ↓
+          HUMAN AUTHORIZATION
+                    ↓
+           PAYPAL WORKFLOW
+                    ↓
+            CUSTOMER PAYMENT
+                    ↓
+             WEBHOOK EVENT
+                    ↓
+            AUTOMATED UPDATE
+```
+
+**PayPilot turns payment data into an intelligent, controlled, event-driven revenue recovery system.**
+
+---
+
+# 🏆 Hackathon Value Proposition
+
+### For Businesses
+
+- Identify revenue leakage earlier
+- Prioritize high-risk customers
+- Understand changing payment behavior
+- Automate repetitive recovery workflows
+- Reduce manual revenue operations
+- Maintain human control over financial actions
+
+### For Revenue Teams
+
+PayPilot transforms:
+
+**"Who owes us money?"**
+
+into:
+
+**"Who is becoming risky, why are they risky, what action should we take, and what happened after the action?"**
+
+---
+
+# 📌 Project Status
+
+**Hackathon Demo Ready**
+
+The current implementation includes:
+
+- ✅ Customer Intelligence
+- ✅ Revenue Risk Detection
+- ✅ AI Revenue Agent
+- ✅ Tool Calling
+- ✅ 4-Tier Permission Engine
+- ✅ Human-in-the-Loop Authorization
+- ✅ PayPal Workflow Integration
+- ✅ Webhook Feedback Loop
+- ✅ Automated Reminder Cancellation
+- ✅ Audit Logging
+- ✅ Demo Simulator
+- ✅ Critical Integration Tests
+
+---
+
+# 📄 License
+
+This project is licensed under the **MIT License**.
+
+See [`LICENSE`](LICENSE) for details.
+
+---
+
+## 🚀 PayPilot
+
+> **From payment data → to customer intelligence → to revenue recovery.**
+
+**AI that doesn't just explain your revenue — it helps you recover it, safely.**
